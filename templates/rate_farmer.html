@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Rate a Farmer{% endblock %}
+
+{% block content %}
+<div class="form-container" style="max-width: 600px; margin: 2rem auto;">
+    <h2>Leave Feedback for a Farmer</h2>
+    <p>Your feedback helps our farmers and other users. Please be honest and fair.</p>
+    
+    <form action="{{ url_for('submit_rating') }}" method="post">
+        <div class="form-group">
+            <label for="farmer_id">Select Farmer</label>
+            <select id="farmer_id" name="farmer_id" class="form-input" required>
+                <option value="">-- Choose a farmer --</option>
+                {% for farmer in farmers %}
+                <option value="{{ farmer.id }}">{{ farmer.name }} - {{ farmer.city }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="rating_value">Your Rating (1-5 Stars)</label>
+            <select id="rating_value" name="rating_value" class="form-input" required>
+                <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
+                <option value="4">⭐⭐⭐⭐ (Good)</option>
+                <option value="3">⭐⭐⭐ (Average)</option>
+                <option value="2">⭐⭐ (Poor)</option>
+                <option value="1">⭐ (Very Poor)</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="comment">Comments (Optional)</label>
+            <textarea id="comment" name="comment" class="form-input" rows="4" placeholder="Add any additional comments here."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit Feedback</button>
+    </form>
+
+    <p class="form-footer">
+        <a href="{{ url_for('user_dashboard') }}">Back to Dashboard</a>
+    </p>
+</div>
+{% endblock %}

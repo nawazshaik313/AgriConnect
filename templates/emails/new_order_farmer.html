@@ -1,0 +1,19 @@
+<h3>You Have a New Order!</h3>
+<p>Hi {{ farmer.name }},</p>
+<p>Congratulations, you've received a new order on AgriConnect!</p>
+<p><strong>Order ID:</strong> #{{ order.id }}</p>
+<p><strong>Customer Name:</strong> {{ order.user.name }}</p>
+<hr>
+<h4>Shipping Address:</h4>
+<pre>{{ order.shipping_address }}</pre>
+<hr>
+<h4>Items Ordered:</h4>
+<ul>
+    {% for item in order.items %}
+        {% if item.product.farmer_id == farmer.id %}
+            <li>{{ item.product.name }} (Qty: {{ item.quantity }})</li>
+        {% endif %}
+    {% endfor %}
+</ul>
+<p>Please log in to your dashboard to manage this order.</p>
+<p>Thank you,<br>The AgriConnect Team</p>

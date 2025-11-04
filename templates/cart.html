@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Your Shopping Cart{% endblock %}
+
+{% block content %}
+<div class="dashboard-container" style="max-width: 900px; margin: 2rem auto;">
+    <header class="dashboard-header">
+    <h1>Your Shopping Cart</h1>
+    <div>
+        {% if g.user and g.user.role == 'user' %}
+            <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">My Dashboard</a>
+        {% endif %}
+        <a href="{{ url_for('product_marketplace') }}" class="btn btn-logout">← Continue Shopping</a>
+    </div>
+</header>
+
+    <div class="content-area">
+        {% if cart_items %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price per Item</th>
+                            <th style="text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart_items %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>₹{{ item.product.price|format_currency }}</td>
+                            <td style="text-align: right;">₹{{ item.total|format_currency }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" style="text-align: right; font-weight: 600;">Grand Total:</td>
+                            <td style="text-align: right; font-weight: 700; font-size: 1.2rem;">₹{{ total_price|format_currency }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="checkout-section">
+    <h3>Delivery and Payment Details</h3>
+    
+    <form action="{{ url_for('checkout') }}" method="post" id="checkout-form">
+        <h4>Shipping Address</h4>
+        <div class="address-form-grid">
+            <div class="form-group">
+                <label for="address_line1">Address Line 1</label>
+                <input type="text" id="address_line1" name="address_line1" class="form-input" placeholder="House No., Building Name" required>
+            </div>
+            <div class="form-group">
+                <label for="address_line2">Address Line 2 (Optional)</label>
+                <input type="text" id="address_line2" name="address_line2" class="form-input" placeholder="Area, Colony, Road Name">
+            </div>
+            <div class="form-group">
+                <label for="city">City</label>
+                <input type="text" id="city" name="city" class="form-input" placeholder="Your City" required>
+            </div>
+            <div class="form-group">
+                <label for="state">State</label>
+                <input type="text" id="state" name="state" class="form-input" placeholder="Your State" required>
+            </div>
+            <div class="form-group">
+                <label for="pincode">Pincode</label>
+                <input type="text" id="pincode" name="pincode" class="form-input" placeholder="6-digit Pincode" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Contact Number</label>
+                <input type="tel" id="phone" name="phone" class="form-input" placeholder="Your 10-digit mobile number" required>
+            </div>
+        </div>
+
+        <h4 style="margin-top: 2rem;">Payment Method</h4>
+        <div class="form-group">
+            <select name="payment_method" class="form-input" required>
+                <option value="" disabled selected>-- Select a Payment Method --</option>
+                <option value="COD">Cash on Delivery (COD)</option>
+                <option value="UPI">UPI (PhonePe, GPay, etc.)</option>
+            </select>
+        </div>
+        
+        <p style="margin-top: 1rem;">By clicking "Place Order", you confirm your purchase.</p>
+        <button type="submit" class="btn btn-primary btn-lg">Place Order</button>
+    </form>
+</div>
+        {% else %}
+            <div class="empty-message">
+                <h3>Your Cart is Empty</h3>
+                <p>You haven't added any products yet. Why not explore our marketplace?</p>
+                <a href="{{ url_for('product_marketplace') }}" class="btn btn-primary" style="margin-top: 1rem;">Go to Marketplace</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

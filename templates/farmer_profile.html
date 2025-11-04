@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ farmer.name }}'s Profile{% endblock %}
+
+{% block content %}
+<div class="dashboard-container" style="max-width: 1200px; margin: 2rem auto;">
+    <header class="dashboard-header">
+        <h1>Farmer Profile</h1>
+        <a href="{{ url_for('product_marketplace') }}" class="btn btn-logout">← Back to Marketplace</a>
+    </header>
+
+    <div class="farmer-profile-card" style="margin-top: 2rem;">
+        <h2>{{ farmer.name }}</h2>
+        <p><strong>Location:</strong> {{ farmer.city or 'N/A' }}, {{ farmer.state or 'N/A' }}</p>
+        
+        <p><strong>Member Since:</strong>
+            {% if farmer.timestamp %}
+                {{ farmer.timestamp.strftime('%B %Y') }}
+            {% else %}
+                N/A
+            {% endif %}
+        </p>
+        <div class="profile-rating">
+            <span class="rating-value">⭐ {{ avg_rating|round(1) if avg_rating else 'New Farmer' }}</span>
+            <span class="rating-count">({{ ratings|length }} reviews)</span>
+        </div>
+        <a href="{{ url_for('conversation', recipient_id=farmer.id) }}" class="btn btn-primary">Send Message</a>
+    </div>
+
+    <h3 style="margin-top: 3rem;">All Products from {{ farmer.name }}</h3>
+    <div class="product-grid">
+        {% if products %}
+            {% for product in products %}
+            <div class="product-card">
+                <img src="{{ url_for('uploaded_file', filename=product.image_path.split('/')[-1].split('\\')[-1]) }}" alt="{{ product.name }}">
+                <div class="product-card-content">
+                    <h3>{{ product.name }}</h3>
+                    <p class="product-category">{{ product.category }}</p>
+                    <p class="product-description">{{ product.description }}</p>
+                    <div class="product-card-footer">
+                        <span class="product-price">₹{{ product.price|format_currency }}</span>
+                        <a href="{{ url_for('add_to_cart', product_id=product.id) }}" class="add-to-cart-btn">Add to Cart</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-message">This farmer has no products listed yet.</p>
+        {% endif %}
+    </div>
+
+    <h3 style="margin-top: 3rem;">Reviews</h3>
+    <div class="reviews-container">
+        {% if ratings %}
+            {% for rating in ratings %}
+            <div class="review-card">
+                <div class="review-rating">
+                    {% for i in range(rating.rating_value) %}⭐{% endfor %}
+                </div>
+                <p class="review-comment">"{{ rating.comment }}"</p>
+                <p class="review-author">- {{ rating.rater.name }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-message">This farmer has no reviews yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

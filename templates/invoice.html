@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Invoice #{{ order.id }}</title>
+    <style>
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; }
+        .container { width: 90%; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 20px; }
+        .header h1 { color: #2a9d8f; }
+        .details { margin-top: 30px; display: flex; justify-content: space-between; }
+        .details div { width: 45%; }
+        .details h3 { border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+        .details p, .details pre { font-size: 0.9rem; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+        th, td { border-bottom: 1px solid #ddd; padding: 12px; text-align: left; }
+        thead { background-color: #f8f9fa; }
+        tfoot td { font-weight: bold; font-size: 1.2rem; text-align: right; }
+        .total-row { border-top: 2px solid #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AgriConnect</h1>
+            <h2>Invoice</h2>
+        </div>
+
+        <div class="details">
+            <div class="billed-to">
+                <h3>Billed To:</h3>
+                <pre>
+<strong>{{ order.user.name }}</strong>
+{{ order.shipping_address }}
+{{ order.user.email }}
+                </pre>
+            </div>
+            <div class="invoice-info">
+                <h3>Invoice Details:</h3>
+                <p><strong>Invoice #:</strong> {{ order.id }}</p>
+                <p><strong>Order Date:</strong> {{ order.order_date.strftime('%Y-%m-%d') }}</p>
+                <p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
+                <p><strong>Status:</strong> {{ order.status }}</p>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Farmer</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.product.farmer.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₹{{ item.price|format_currency }}</td>
+                    <td>₹{{ (item.price * item.quantity)|format_currency }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="4">Grand Total</td>
+                    <td>₹{{ order.total_amount|format_currency }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</body>
+</html>

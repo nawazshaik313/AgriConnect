@@ -1,0 +1,1056 @@
+/* =================================== */
+/* 1. Global Setup & Color Palette   */
+/* =================================== */
+:root {
+    --primary-color: #2a9d8f;      /* A vibrant teal */
+    --secondary-color: #264653;    /* A deep, dark blue */
+    --warning-color: #e9c46a;     /* A warm yellow */
+    --danger-color: #e76f51;       /* A soft red/orange */
+    --info-color: #457b9d;         /* A friendly blue */
+    
+    --bg-color: #f7f9fc;           /* A very light, clean blue-ish gray */
+    --form-bg: #ffffff;
+    --text-color: #333;
+    --border-color: #dee2e6;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color);
+    margin: 0;
+    min-height: 100vh;
+    /* Full-screen gradient background for all pages */
+    background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    background-attachment: fixed;
+    /* Default padding for dashboard pages */
+    padding: 2rem; 
+}
+
+/* =================================== */
+/* 2. Login/Register Page Styles     */
+
+
+.form-container {
+    width: 100%;
+    max-width: 500px;
+    background: var(--form-bg);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin: 2rem auto; /* Centers the form on pages that don't use .login-page */
+}
+
+.form-box {
+    padding: 2.5rem;
+    text-align: center;
+}
+
+.form-title {
+    margin: 0 0 0.5rem 0;
+    color: var(--secondary-color);
+}
+
+.form-subtitle {
+    margin: 0 0 2rem 0;
+    color: #6c757d;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-input,
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="password"],
+.form-group input[type="number"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.form-input:focus,
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-input:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+    color: #6c757d;
+}
+
+.form-switch {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+.form-switch a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+.form-footer {
+    margin-top: 25px;
+    text-align: center;
+}
+.form-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.file-upload {
+    background: #f8f9fa;
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+}
+.file-upload label {
+    font-weight: 500;
+    color: #495057;
+}
+.file-upload input[type="file"] {
+    width: 100%;
+}
+
+/* --- View Switching --- */
+.view {
+    display: none;
+}
+.view.active {
+    display: block;
+    animation: fadeIn 0.5s ease-in-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Password Toggle --- */
+.password-wrapper {
+    position: relative;
+}
+.password-wrapper input[type="password"],
+.password-wrapper input[type="text"] {
+    /* Add padding to the right to make space for the button */
+    padding-right: 60px !important; 
+}
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%; /* Default for inputs without labels */
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+/* Adjust toggle position when there is a label above the input */
+.form-group .toggle-password {
+    top: 65%; 
+}
+
+/* =================================== */
+/* 3. Buttons & Notifications        */
+/* =================================== */
+
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.submit-btn:hover {
+    background-color: #248a7e;
+}
+
+.role-choice-btn {
+    margin-bottom: 1rem;
+}
+.role-choice-btn.secondary {
+    background-color: #f8f9fa;
+    color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+}
+.role-choice-btn.secondary:hover {
+    background-color: #e9ecef;
+}
+
+.btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    text-decoration: none;
+    color: white;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin-right: 5px;
+    font-weight: 500;
+}
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+.btn-primary:hover {
+    background-color: #248a7e; /* Darker teal */
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+.btn-secondary:hover {
+    background-color: #1a3038;
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+.btn-danger:hover {
+    background-color: #d95a3a;
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    color: var(--secondary-color);
+}
+.btn-warning:hover {
+    background-color: #d4b25a;
+}
+
+.btn-logout {
+    background-color: #f8f9fa;
+    color: #495057;
+    border: 1px solid #dee2e6;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+.btn-logout:hover {
+    background-color: #e9ecef;
+}
+
+.btn-lg {
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+.btn-sm {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+}
+
+/* --- Flash Message Container --- */
+.flash-container {
+    width: 100%;
+    position: sticky; 
+    top: 0;
+    z-index: 100;
+}
+.flash {
+    padding: 1rem;
+    margin: 1rem;
+    border-radius: 8px;
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.flash-success { background-color: var(--success); }
+.flash-danger { background-color: var(--danger-color); }
+.flash-warning { background-color: var(--warning-color); color: #212529; }
+.flash-info { background-color: var(--info-color); }
+
+/* --- Toast Notification --- */
+.toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: var(--success);
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 16px;
+    position: fixed;
+    z-index: 10;
+    right: 30px;
+    bottom: 30px;
+    font-size: 17px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+}
+.toast.show {
+    visibility: visible;
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* =================================== */
+/* 4. Dashboard & Marketplace Layout */
+/* =================================== */
+
+.dashboard-container {
+    width: 100%;
+    /* Set a large default max-width for all dashboards */
+    max-width: 1200px; 
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+    margin: 2rem auto; /* This centers the container */
+}
+
+/* This class (used on your marketplace page) makes it even wider */
+.marketplace-container {
+    max-width: 1400px; 
+}
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap; 
+    gap: 1rem;       
+}
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    color: #343a40;
+    flex-shrink: 0;
+}
+.dashboard-header > div {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.stat-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.07);
+}
+
+.card-icon { 
+    font-size: 2.5rem; 
+    padding: 1rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.card-icon.users { background-color: #e7f5ff; color: #1c7ed6; }
+.card-icon.approved { background-color: #e6fcf5; color: #2f9e44; }
+.card-icon.pending { background-color: #fff9db; color: #f59f00; }
+.card-icon.approved[style*="💰"] { background-color: #e6fcf5; color: #2f9e44; }
+.card-icon.pending[style*="⭐"] { background-color: #fff0f6; color: #d6336c; }
+
+.card-info { display: flex; flex-direction: column; }
+.card-value { font-size: 2rem; font-weight: 600; color: #212529; }
+.card-title { color: #868e96; }
+
+.content-area {
+    background-color: #f8f9fa;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+}
+.tab-link {
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #6c757d;
+    margin-bottom: -1px;
+    border-bottom: 3px solid transparent;
+}
+.tab-link:hover {
+    color: var(--primary-color);
+}
+.tab-link.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+.tab-content {
+    display: none;
+    padding-top: 1.5rem;
+    animation: fadeIn 0.5s;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.1rem;
+    color: #6c757d;
+}
+
+/* =================================== */
+/* 5. Tables & Badges                */
+/* =================================== */
+
+.table-wrapper { overflow-x: auto; }
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 0.9rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+thead { background-color: #f1f3f5; }
+th { font-weight: 600; color: #495057; }
+td a { color: #007bff; text-decoration: none; font-weight: 500; }
+td a:hover { text-decoration: underline; }
+
+.table-action-buttons form {
+    display: inline-block;
+    margin-right: 5px;
+}
+.table-action-buttons .btn {
+    vertical-align: middle;
+}
+
+.status-badge {
+    padding: 0.25em 0.6em;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 10px;
+    color: #fff;
+    text-transform: capitalize;
+}
+.status-badge.status-pending,
+.status-badge.status-processing {
+    background-color: var(--warning-color);
+    color: #212529;
+}
+.status-badge.status-shipped {
+    background-color: var(--info-color);
+}
+.status-badge.status-delivered {
+    background-color: var(--success);
+}
+.status-badge.status-rejected,
+.status-badge.status-cancelled {
+    background-color: var(--danger-color);
+}
+
+.status-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.status-form select {
+    padding: 0.3rem;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+}
+
+/* =================================== */
+/* 6. Marketplace & Product Card     */
+/* =================================== */
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding-top: 2rem;
+}
+
+.product-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+}
+.product-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+    border-bottom: 1px solid var(--border-color);
+}
+.product-card-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+.product-card-content h3 {
+    margin-top: 0;
+    margin-bottom: 0.25rem;
+    font-size: 1.25rem;
+    color: #343a40;
+}
+.product-farmer {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #6c757d;
+    margin-bottom: 0.75rem;
+    margin-top: -5px;
+}
+.product-farmer strong {
+    color: var(--primary-color);
+}
+.product-category {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+.product-description {
+    color: #495057;
+    font-size: 0.95rem;
+    flex-grow: 1; 
+}
+.product-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+.product-price {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #2b8a3e;
+}
+.add-to-cart-btn {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+.add-to-cart-btn:hover {
+    background-color: #248a7e;
+}
+
+.wishlist-btn {
+    font-size: 1.5rem;
+    text-decoration: none;
+    transition: transform 0.2s;
+}
+.wishlist-btn:hover {
+    transform: scale(1.2);
+}
+.wishlist-btn.active {
+    color: var(--danger-color); /* Red heart for "saved" */
+}
+
+/* =================================== */
+/* 7. Filter Bar                     */
+/* =================================== */
+
+.filter-bar {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+.filter-toggle-btn {
+    width: 100%;
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #495057;
+    padding: 0;
+    margin-bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: margin 0.4s ease-in-out;
+}
+.filter-toggle-btn .toggle-arrow {
+    transition: transform 0.4s ease;
+}
+.filter-toggle-btn.active {
+     margin-bottom: 1.5rem; 
+}
+.filter-toggle-btn.active .toggle-arrow {
+    transform: rotate(180deg);
+}
+.filter-toggle-btn:hover {
+    color: var(--primary-color);
+}
+
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out;
+}
+.collapsible-content.active {
+    max-height: 500px;
+}
+
+.filter-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    align-items: center;
+}
+.filter-form .btn-primary {
+    grid-column: 1 / -1; 
+    height: 47px; 
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    font-weight: 600;
+}
+
+/* =================================== */
+/* 8. Cart & Profile Pages           */
+/* =================================== */
+
+.table-wrapper tfoot td {
+    border-top: 2px solid #343a40;
+}
+.checkout-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+    text-align: right;
+}
+.checkout-section h3 {
+    text-align: right;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+.checkout-section p {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+.address-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    text-align: left;
+}
+.address-form-grid .form-group:first-child,
+.address-form-grid .form-group:nth-child(2) {
+    grid-column: 1 / -1; /* Make first two fields full-width */
+}
+
+.farmer-profile-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    margin-top: 1.5rem;
+    margin-bottom: 2rem;
+}
+.farmer-profile-card h3 {
+    color: #343a40;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+.farmer-profile-card p {
+    margin-bottom: 0.75rem;
+    color: #495057;
+    font-size: 1rem;
+}
+.farmer-profile-card span {
+    font-weight: 600;
+    color: #212529;
+    margin-right: 8px;
+}
+.profile-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+.rating-value {
+    font-weight: 700;
+    color: var(--warning-color);
+}
+.rating-count {
+    color: #6c757d;
+}
+
+.reviews-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.review-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+.review-rating {
+    font-size: 1.2rem;
+    color: var(--warning-color);
+}
+.review-comment {
+    font-style: italic;
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    color: #343a40;
+}
+.review-author {
+    font-weight: 500;
+    color: #6c757d;
+    text-align: right;
+}
+
+/* =================================== */
+/* 9. AI Tools Page                  */
+/* =================================== */
+
+.ai-tools-container h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+    color: #343a40;
+    margin-bottom: 0.5rem;
+}
+.ai-icon {
+    font-size: 1.5rem;
+}
+.ai-tools-description {
+    color: #6c757d;
+    margin-bottom: 2rem;
+    max-width: 80%;
+}
+
+.ai-tool-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+.ai-tool-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+.ai-tool-card h4 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: #343a40;
+    font-size: 1.2rem;
+}
+.form-description {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+.ai-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+}
+.ai-form .form-group {
+    flex: 1;
+    min-width: 200px;
+}
+.ai-form .btn-primary {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.ai-result {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+    animation: fadeIn 0.5s;
+}
+.ai-result p {
+    margin: 0.5rem 0;
+    color: #343a40;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.ai-result strong {
+    font-size: 1rem;
+    color: #495057;
+}
+.ai-result .highlight {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+.ai-result span {
+    font-weight: 500;
+}
+.ai-result .reasoning {
+    margin-top: 0.75rem;
+    font-style: italic;
+    color: #6c757d;
+    font-size: 0.9em;
+    display: block;
+}
+
+.price-result {
+    background-color: #e6fcf5;
+    border-left: 5px solid #2f9e44;
+}
+.price-result .highlight {
+    color: #2b8a3e;
+}
+
+.forecast-result {
+    background-color: #e7f5ff;
+    border-left: 5px solid #1c7ed6;
+}
+.forecast-result .highlight {
+    color: #1864ab;
+}
+
+/* =================================== */
+/* 10. Messaging Styles              */
+/* =================================== */
+
+.message-container {
+    height: 60vh;
+    overflow-y: auto;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+.message {
+    padding: 0.75rem 1.25rem;
+    border-radius: 20px;
+    margin-bottom: 0.75rem;
+    max-width: 70%;
+    position: relative;
+}
+.message.sent {
+    background-color: var(--primary-color);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 5px;
+}
+.message.received {
+    background-color: #e9ecef;
+    color: #212529;
+    align-self: flex-start;
+    border-bottom-left-radius: 5px;
+}
+.message p {
+    margin: 0;
+}
+.message .timestamp {
+    font-size: 0.75em;
+    color: #6c757d;
+    display: block;
+    margin-top: 5px;
+}
+.message.sent .timestamp {
+    color: rgba(255, 255, 255, 0.7);
+}
+.message-form {
+    display: flex;
+    gap: 1rem;
+}
+.message-form textarea {
+    flex: 1;
+    resize: none;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* =================================== */
+/* 11. Utility Classes               */
+/* =================================== */
+.visually-hidden {
+    display: none;
+}
+
+
+/* These styles in static/style.css will fix the layout */
+
+.form-container {
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    text-align: center;
+    max-width: 600px;
+    margin: 2rem auto;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+/* This styles the gray, un-editable email field */
+.form-input:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+    color: #6c757d;
+}
+/* =================================== */
+/* Styles for Order Status Badges      */
+/* =================================== */
+
+.status-badge {
+    padding: 0.25em 0.6em;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 10px;
+    color: #fff;
+    text-transform: capitalize;
+    /* Default background color */
+    background-color: #6c757d; /* Gray */
+}
+
+.status-badge.status-pending,
+.status-badge.status-processing {
+    background-color: #ffc107; /* Yellow */
+    color: #212529; /* Dark text for light background */
+}
+
+.status-badge.status-shipped {
+    background-color: #17a2b8; /* Teal */
+}
+
+.status-badge.status-delivered {
+    background-color: #28a745; /* Green */
+}
+
+.status-badge.status-rejected,
+.status-badge.status-cancelled {
+    background-color: #dc3545; /* Red */
+}   
+/* Add these to your .status-badge styles in static/style.css */
+
+.status-badge.status-pending,
+.status-badge.status-processing {
+    background-color: #ffc107; /* Yellow */
+    color: #212529;
+}
+
+/* --- NEW STYLE --- */
+.status-badge.status-packed {
+    background-color: #fd7e14; /* Orange */
+}
+
+.status-badge.status-shipped {
+    background-color: #17a2b8; /* Teal */
+}
+
+.status-badge.status-delivered {
+    background-color: #28a745; /* Green */
+}

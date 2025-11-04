@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Complete Your Payment{% endblock %}
+{% block content %}
+<div class="dashboard-container" style="max-width: 600px; text-align: center;">
+    <h2>Complete Your Payment</h2>
+    <p>Please scan the QR code below with your UPI app to pay <strong>₹{{ order.total_amount|format_currency }}</strong> to {{ farmer.name }}.</p>
+    
+    <div class="qr-code-container">
+        <img src="{{ url_for('uploaded_file', filename=qr_filename) }}" alt="UPI QR Code">
+    </div>
+
+    <div class="upi-details">
+        <p><strong>Payable To:</strong> {{ farmer.name }}</p>
+        <p><strong>UPI ID:</strong> {{ farmer.upi_id }}</p>
+        <p><strong>Amount:</strong> ₹{{ order.total_amount|format_currency }}</p>
+    </div>
+
+    <a href="{{ url_for('index') }}" class="btn btn-primary">I have paid, go to homepage</a>
+</div>
+{% endblock %}

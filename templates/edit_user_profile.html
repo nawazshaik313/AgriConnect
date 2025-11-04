@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Edit Your Profile{% endblock %}
+
+{% block content %}
+<div class="form-container" style="max-width: 600px; margin: 2rem auto;">
+    <h2>Edit Profile</h2>
+    <p>Update your personal and delivery information below.</p>
+    
+    <form action="{{ url_for('edit_user_profile') }}" method="post">
+        
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" class="form-input" value="{{ user.name }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email Address (cannot be changed)</label>
+            <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}" disabled>
+        </div>
+        
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" class="form-input" value="{{ user.phone or '' }}">
+        </div>
+
+        <h4 style="margin-top: 2rem; margin-bottom: 1rem; text-align: left;">Delivery Address</h4>
+        
+        <div class="form-group">
+            <label for="address_line1">Address Line 1</label>
+            <input type="text" id="address_line1" name="address_line1" class="form-input" value="{{ user.address_line1 or '' }}">
+        </div>
+        <div class="form-group">
+            <label for="address_line2">Address Line 2 (Optional)</label>
+            <input type="text" id="address_line2" name="address_line2" class="form-input" value="{{ user.address_line2 or '' }}">
+        </div>
+        <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" name="city" class="form-input" value="{{ user.city or '' }}">
+        </div>
+        <div class="form-group">
+            <label for="state">State</label>
+            <input type="text" id="state" name="state" class="form-input" value="{{ user.state or '' }}">
+        </div>
+        <div class="form-group">
+            <label for="pincode">Pincode</label>
+            <input type="text" id="pincode" name="pincode" class="form-input" value="{{ user.pincode or '' }}">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Save Changes</button>
+    </form>
+    <p class="form-footer" style="margin-top: 1.5rem;">
+        <a href="{{ url_for('user_dashboard') }}">Back to Dashboard</a>
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Inbox{% endblock %}
+{% block content %}
+<div class="dashboard-container">
+    <header class="dashboard-header"><h1>My Conversations</h1></header>
+    <div class="content-area">
+        {% if conversations %}
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Conversation With</th><th>Unread Messages</th><th>Action</th></tr></thead>
+                    <tbody>
+                    {% for convo in conversations %}
+                        <tr>
+                            <td>{{ convo.partner.name }}</td>
+                            <td>{% if convo.unread > 0 %}<strong>{{ convo.unread }}</strong>{% else %}0{% endif %}</td>
+                            <td><a href="{{ url_for('conversation', recipient_id=convo.partner.id) }}" class="btn btn-primary">View</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="empty-message">You have no conversations yet. Find a farmer in the directory to start one!</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

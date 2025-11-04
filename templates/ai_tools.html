@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}AI-Powered Tools - AgriConnect{% endblock %}
+
+{% block content %}
+<div class="dashboard-container" style="max-width: 900px; margin: 2rem auto;">
+    <header class="dashboard-header">
+        <h1>AI-Powered Tools</h1>
+        <a href="{{ url_for('farmer_dashboard') }}" class="btn btn-logout">← Back to Dashboard</a>
+    </header>
+
+    <div class="content-area">
+        <p class="ai-tools-description" style="max-width: 100%; text-align: center;">
+            Get data-driven insights tailored to your location ({{ farmer_city or 'N/A' }}, {{ farmer_state or 'N/A' }}).
+        </p>
+
+        <div class="ai-tool-card">
+            <h4>Price Recommendation Engine</h4>
+            <p class="form-description">Get a smart price suggestion based on your product category, base price, and location.</p>
+            
+            <form action="{{ url_for('ai_tools') }}" method="post" class="ai-form">
+                <div class="form-group">
+                    <label for="price-category">Product Category</label>
+                    <input type="text" id="price-category" name="category" class="form-input" placeholder="e.g., Onions, Wheat" required>
+                </div>
+                <div class="form-group">
+                    <label for="base-price">Your Base Price (₹)</label>
+                    <input type="number" id="base-price" name="base_price" step="0.01" class="form-input" placeholder="e.g., 40" required>
+                </div>
+                <input type="hidden" name="farmer_city" value="{{ farmer_city }}">
+                <input type="hidden" name="farmer_state" value="{{ farmer_state }}">
+                
+                <button type="submit" name="submit_price" class="btn btn-primary">Get Recommendation</button>
+            </form>
+            
+            {% if price_rec and price_rec.error is not defined %}
+            <div class="ai-result price-result">
+                <p><strong>Live Market Price ({{ farmer_city }}):</strong> <span>{{ price_rec.live_market_price }}</span></p>
+                <p><strong>Recommended Price:</strong> <strong class="highlight">₹{{ price_rec.recommended_price|format_currency }}</strong></p>
+                <p class="reasoning"><em>{{ price_rec.reasoning }}</em></p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="ai-tool-card">
+            <h4>Demand Forecast</h4>
+            <p class="form-description">Get a demand forecast for your location based on simulated seasonal and market trends.</p>
+
+            <form action="{{ url_for('ai_tools') }}" method="post" class="ai-form">
+                <div class="form-group">
+                    <label for="forecast-category">Product Category</label>
+                    <input type="text" id="forecast-category" name="forecast_category" class="form-input" placeholder="e.g., Mangoes, Rice" required>
+                </div>
+                <input type="hidden" name="farmer_city" value="{{ farmer_city }}">
+                <input type="hidden" name="farmer_state" value="{{ farmer_state }}">
+
+                <button type="submit" name="submit_forecast" class="btn btn-primary">Get Forecast</button>
+            </form>
+
+            {% if demand_forecast and demand_forecast.error is not defined %}
+            <div class="ai-result forecast-result">
+                <p><strong>Demand Trend ({{ farmer_city }}):</strong> <strong class="highlight">{{ demand_forecast.trend }}</strong></p>
+                <p><strong>Next Month's Est. Change:</strong> <span>{{ demand_forecast.next_month_estimate }}</span></p>
+                <p class="reasoning"><em>{{ demand_forecast.reasoning }}</em></p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Conversation with {{ other_farmer.name }}{% endblock %}
+{% block content %}
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1>Conversation with {{ other_farmer.name }}</h1>
+        <a href="{{ url_for('inbox') }}" class="btn btn-logout">← Back to Inbox</a>
+    </header>
+    <div class="content-area">
+        <div class="message-container">
+            {% for message in messages %}
+                <div class="message {% if message.sender_id == current_farmer.id %}sent{% else %}received{% endif %}">
+                    <p>{{ message.content }}</p>
+                    <span class="timestamp">{{ message.timestamp.strftime('%b %d, %H:%M') }}</span>
+                </div>
+            {% endfor %}
+        </div>
+        <form action="{{ url_for('conversation', recipient_id=other_farmer.id) }}" method="post" class="message-form">
+            <textarea name="content" placeholder="Type your message..." required></textarea>
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

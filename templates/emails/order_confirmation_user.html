@@ -1,0 +1,18 @@
+<h3>Your AgriConnect Order is Confirmed!</h3>
+<p>Hi {{ user.name }},</p>
+<p>Thank you for your order! Here are the details:</p>
+<p><strong>Order ID:</strong> #{{ order.id }}</p>
+<p><strong>Total Amount:</strong> ₹{{ order.total_amount|format_currency }}</p>
+<p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
+<hr>
+<h4>Shipping Address:</h4>
+<pre>{{ order.shipping_address }}</pre>
+<hr>
+<h4>Items Ordered:</h4>
+<ul>
+    {% for item in order.items %}
+    <li>{{ item.product.name }} (Qty: {{ item.quantity }}) - ₹{{ (item.price * item.quantity)|format_currency }}</li>
+    {% endfor %}
+</ul>
+<p>The farmer will process your order shortly.</p>
+<p>Thank you,<br>The AgriConnect Team</p>

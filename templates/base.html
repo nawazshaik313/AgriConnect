@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AgriConnect{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="main-content-wrapper">
+        {% block content %}{% endblock %}
+    </div>
+
+    <div id="toast-notification" class="toast">
+        <div id="toast-message"></div>
+    </div>
+    
+    <script>
+        function showToast(message) {
+            const toast = document.getElementById("toast-notification");
+            const toastMessage = document.getElementById("toast-message");
+            toastMessage.textContent = message;
+            toast.className = "toast show";
+            setTimeout(function(){ 
+                toast.className = toast.className.replace("show", ""); 
+            }, 3000);
+        }
+    </script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const allToggles = document.querySelectorAll('.toggle-password');
+        allToggles.forEach(toggle => {
+            toggle.addEventListener('click', function () {
+                const passwordInput = this.previousElementSibling;
+                if (passwordInput) {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    this.textContent = type === 'password' ? 'Show' : 'Hide';
+                }
+            });
+        });
+    });
+    </script>
+
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}My Wishlist{% endblock %}
+
+{% block content %}
+<div class="dashboard-container" style="max-width: 1400px; margin: 2rem auto;">
+    <header class="dashboard-header">
+    <h1>My Wishlist</h1>
+    <div>
+        {% if g.user and g.user.role == 'user' %}
+            <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">My Dashboard</a>
+        {% endif %}
+        <a href="{{ url_for('product_marketplace') }}" class="btn btn-primary">Continue Shopping</a>
+    </div>
+</header>
+    <div class="product-grid">
+        {% if wishlist_items %}
+            {% for product in wishlist_items %}
+            <div class="product-card">
+                <img src="{{ url_for('uploaded_file', filename=product.image_path.split('/')[-1].split('\\')[-1]) }}" alt="{{ product.name }}">
+                <div class="product-card-content">
+                    <h3>{{ product.name }}</h3>
+                    <p class="product-category">{{ product.category }}</p>
+                    <p class="product-description">{{ product.description }}</p>
+                    <div class="product-card-footer">
+                        <span class="product-price">₹{{ product.price|format_currency }}</span>
+                        <a href="{{ url_for('toggle_wishlist', product_id=product.id) }}" class="wishlist-btn active" title="Remove from Wishlist">❤️</a>
+                        <a href="{{ url_for('add_to_cart', product_id=product.id) }}" class="add-to-cart-btn">Add to Cart</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-message">Your wishlist is empty. 🤍</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

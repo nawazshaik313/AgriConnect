@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Add New Product{% endblock %}
+
+{% block content %}
+<div class="dashboard-container" style="max-width: 700px; margin: 2rem auto;">
+    <header class="dashboard-header">
+        <h1>Add a New Product</h1>
+        <a href="{{ url_for('farmer_dashboard') }}" class="btn btn-logout">← Back to Dashboard</a>
+    </header>
+
+    <div class="content-area">
+        <p class="form-description" style="text-align: center;">Fill out the details below to list a new item on the marketplace.</p>
+        
+        <form action="{{ url_for('add_product_page') }}" method="post" enctype="multipart/form-data">
+            
+            <div class="form-group">
+                <label for="name">Product Name</label>
+                <input type="text" id="name" name="name" class="form-input" placeholder="e.g., Fresh Organic Tomatoes" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Product Description</label>
+                <textarea id="description" name="description" class="form-input" rows="4" placeholder="Describe your product, its quality, and origin." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category</label>
+                <input type="text" id="category" name="category" class="form-input" placeholder="e.g., Vegetables, Fruits, Grains" required>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="price">Price (per unit, e.g., kg)</label>
+                    <input type="number" id="price" name="price" class="form-input" step="0.01" placeholder="e.g., 50.00" required>
+                </div>
+
+                <div class="form-group" style="flex: 1;">
+                    <label for="quantity">Available Quantity (in units)</label>
+                    <input type="number" id="quantity" name="quantity" class="form-input" placeholder="e.g., 100" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="image">Product Image</label>
+                <input type="file" id="image" name="image" class="form-input" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Add Product</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

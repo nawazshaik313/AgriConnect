@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Dashboard - AgriConnect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Add any specific styles for the farmer dashboard here if needed */
+        .farmer-profile-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #e9ecef;
+            margin-bottom: 2rem;
+        }
+        .farmer-profile-card h3 {
+            color: #343a40;
+            margin-bottom: 1rem;
+        }
+        .farmer-profile-card p {
+            margin-bottom: 0.5rem;
+            color: #495057;
+        }
+        .farmer-profile-card span {
+            font-weight: 600;
+            color: #212529;
+        }
+        .farmer-section {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #e9ecef;
+            margin-bottom: 1.5rem;
+        }
+        .farmer-section h3 {
+            color: #343a40;
+            margin-bottom: 1rem;
+        }
+        .btn-primary { /* A common primary button style */
+            background-color: #007bff;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .table-action-buttons form {
+            display: inline-block;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <header class="dashboard-header">
+    <h1>Farmer Dashboard</h1>
+    <div>
+        <a href="{{ url_for('product_marketplace') }}" class="btn btn-primary">Marketplace</a>
+        <a href="{{ url_for('inbox') }}" class="btn btn-secondary">Inbox</a>
+        <a href="{{ url_for('farmers_directory') }}" class="btn btn-secondary">Find Farmers</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout ➔</a>
+    </div>
+</header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="stat-cards">
+        <div class="card">
+            <div class="card-icon users">👨‍🌾</div> {# Changed icon to farmer specific #}
+            <div class="card-info">
+                <span class="card-value">{{ total_products }}</span>
+                <span class="card-title">Total Products</span>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon approved">💰</div> {# Icon for earnings/sales #}
+            <div class="card-info">
+                <span class="card-value">₹{{ total_sales_value|format_currency }}</span> {# Format as currency #}
+                <span class="card-title">Total Sales (Est.)</span>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon pending">⭐</div>
+            <div class="card-info">
+                <span class="card-value">{{ avg_rating|round(1) if avg_rating else '0' }}</span>
+                <span class="card-title">Average Rating</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div class="tabs">
+            <button class="tab-link active" onclick="openTab(event, 'Products')">My Products</button>
+            <button class="tab-link" onclick="openTab(event, 'Profile')">My Profile</button>
+            <button class="tab-link" onclick="openTab(event, 'Orders')">My Orders</button>
+            <button class="tab-link" onclick="openTab(event, 'AITools')">AI Tools</button>
+        </div>
+        <div id="Products" class="tab-content" style="display: block;">
+            <h3>Your Products</h3>
+            {% if farmer_products %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in farmer_products %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.category }}</td>
+                                <td>₹{{ product.price }}</td>
+                                <td>{{ product.quantity }}</td>
+                                <td>{{ product.status }}</td>
+                                <td class="actions table-action-buttons">
+                                    <a href="{{ url_for('edit_product', product_id=product.id) }}" class="btn btn-warning">Edit</a>
+                                    <form action="{{ url_for('delete_product', product_id=product.id) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="empty-message">You have not added any products yet. 🌿</p>
+            {% endif %}
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <a href="{{ url_for('add_product_page') }}" class="btn btn-primary">Add New Product</a>
+            </div>
+        </div>
+
+        <div id="Profile" class="tab-content">
+            <h3>Your Profile Information</h3>
+            <div class="farmer-profile-card">
+                <p><span>Name:</span> {{ farmer.name }}</p>
+                <p><span>Email:</span> {{ farmer.email }}</p>
+                <p><span>Phone:</span> {{ farmer.phone if farmer.phone else 'N/A' }}</p>
+                <p><span>City:</span> {{ farmer.city if farmer.city else 'N/A' }}</p>
+                <p><span>Place:</span> {{ farmer.place if farmer.place else 'N/A' }}</p>
+                <p><span>Status:</span> {{ farmer.status.capitalize() }}</p>
+                <div style="margin-top: 1.5rem;">
+                    <a href="{{ url_for('edit_farmer_profile') }}" class="btn btn-primary">Edit Profile</a>
+                </div>
+            </div>
+        </div>
+
+<div id="Orders" class="tab-content">
+    <h3>Your Orders</h3>
+    {% if orders %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID & Date</th>
+                        <th>Customer & Address</th>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in orders %}
+                    <tr>
+                        <td>
+                            <strong>#{{ item.order_id }}</strong><br>
+                            <small>{{ item.order.order_date.strftime('%Y-%m-%d') }}</small>
+                        </td>
+                        <td>
+                            <strong>{{ item.order.user.name }}</strong><br>
+                            <small style="white-space: pre-wrap;">{{ item.order.shipping_address }}</small>
+                        </td>
+                        <td>{{ item.product.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>₹{{ (item.price * item.quantity)|format_currency }}</td>
+                        <td>{{ item.order.payment_method }}</td>
+                        <td>
+                            <span class="status-badge status-{{ item.order.status.lower() }}">
+                                {{ item.order.status }}
+                            </span>
+                        </td>
+
+                        <td class="actions">
+    <form action="{{ url_for('update_order_status', order_id=item.order.id) }}" method="post" class="status-form" id="status-form-{{ item.order.id }}">
+        <select name="status" onchange="document.getElementById('status-form-{{ item.order.id }}').submit();">
+            <option value="Processing" {% if item.order.status == 'Processing' %}selected{% endif %}>Processing</option>
+            <option value="Packed" {% if item.order.status == 'Packed' %}selected{% endif %}>Packed</option>
+            <option value="Shipped" {% if item.order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+            <option value="Delivered" {% if item.order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm visually-hidden">Update</button>
+    </form>
+</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="empty-message">No orders to display yet. 🛒</p>
+    {% endif %}
+</div>
+<div id="AITools" class="tab-content">
+    {% include 'ai_tools.html' %}
+</div>
+<script>
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tab-link");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+    // Set initial active tab if needed
+    document.addEventListener("DOMContentLoaded", function() {
+        // You can make a specific tab active by default or from a URL parameter
+        // For now, it defaults to 'Products' due to style="display: block;"
+    });
+</script>
+
+</body>
+</html>

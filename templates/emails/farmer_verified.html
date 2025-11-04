@@ -1,0 +1,10 @@
+<h3>Your AgriConnect Account Status</h3>
+<p>Hi {{ farmer.name }},</p>
+<p>This is an update regarding your farmer application on AgriConnect.</p>
+<p>Your account has been <strong>{{ farmer.status }}</strong>.</p>
+{% if farmer.status == 'approved' %}
+<p>Congratulations! You can now log in and start adding your products.</p>
+{% else %}
+<p>We are sorry, but your application did not meet our current requirements. Please contact support if you have any questions.</p>
+{% endif %}
+<p>Thank you,<br>The AgriConnect Team</p>

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Marketplace - AgriConnect{% endblock %}
+
+{% block content %}
+<div class="dashboard-container marketplace-container">
+    <header class="dashboard-header">
+        <h1>Marketplace</h1>
+        <div>
+            {% if g.user and g.user.role == 'user' %}
+                <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary">My Dashboard</a>
+            {% elif g.user and g.user.role == 'farmer' %}
+                <a href="{{ url_for('farmer_dashboard') }}" class="btn btn-secondary">My Dashboard</a>
+            {% endif %}
+            
+            {% if g.user %}
+            <a href="{{ url_for('view_wishlist') }}" class="btn btn-secondary">My Wishlist</a>
+            {% endif %}
+            <a href="{{ url_for('view_cart') }}" class="btn btn-primary">View Cart</a>
+        </div>
+    </header>
+
+    <div class="filter-bar">
+        <button id="filter-toggle-btn" class="filter-toggle-btn">
+            <span>Show Filters</span> 
+            <span class="toggle-arrow">▾</span>
+        </button>
+
+        <div id="collapsible-filters" class="collapsible-content">
+            <form action="{{ url_for('product_marketplace') }}" method="GET" class="filter-form">
+                
+                <input type="text" name="search" class="form-input" placeholder="Search product..." value="{{ search_query or '' }}">
+                
+                <select name="category" class="form-input">
+                    <option value="">All Categories</option>
+                    {% for cat in available_categories %}
+                        <option value="{{ cat }}" {% if cat == category_filter %}selected{% endif %}>
+                            {{ cat }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <select name="location" class="form-input">
+                    <option value="">All Locations</option>
+                    {% for loc in available_locations %}
+                        <option value="{{ loc }}" {% if loc == location_filter %}selected{% endif %}>
+                            {{ loc }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <select name="sort_by" class="form-input">
+                    <option value="freshness" {% if sort_by == 'freshness' %}selected{% endif %}>Sort by Newest</option>
+                    <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Sort by Price: Low to High</option>
+                    <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Sort by Price: High to Low</option>
+                </select>
+                
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="product-grid">
+        {% if products %}
+            {% for product in products %} 
+            <div class="product-card">
+                <img src="{{ url_for('uploaded_file', filename=product.image_path.split('/')[-1].split('\\')[-1]) }}" alt="{{ product.name }}">
+                <div class="product-card-content">
+                    <h3>{{ product.name }}</h3>
+                    
+                    <p class="product-farmer">Sold by: 
+                        <a href="{{ url_for('view_farmer_profile', farmer_id=product.farmer.id) }}">
+                            <strong>{{ product.farmer.name }}</strong>
+                        </a>
+                    </p>
+                    
+                    <p class="product-category">{{ product.category }}</p>
+                    
+                    <p class="product-description">{{ product.description }}</p>
+                    
+                    <div class="product-card-footer">
+                        <span class="product-price">₹{{ product.price|format_currency }}</span>
+                        
+                        {% if g.user %}
+                            {% if product.id in wishlist_product_ids %}
+                                <a href="{{ url_for('toggle_wishlist', product_id=product.id) }}" class="wishlist-btn active" title="Remove from Wishlist">❤️</a>
+                            {% else %}
+                                <a href="{{ url_for('toggle_wishlist', product_id=product.id) }}" class="wishlist-btn" title="Save to Wishlist">🤍</a>
+                            {% endif %}
+                        {% endif %}
+                        
+                        <a href="{{ url_for('add_to_cart', product_id=product.id) }}" class="add-to-cart-btn">Add to Cart</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %} 
+        {% else %}
+            <p class="empty-message">No products found. 🚜</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // --- 1. Toast Script ---
+        const addedProduct = urlParams.get('added');
+        if (addedProduct) {
+            // This function 'showToast' is defined in your base.html file
+            showToast(`'${addedProduct}' was added to your cart!`);
+        }
+
+        // --- 2. Filter Toggle Script ---
+        const toggleBtn = document.getElementById('filter-toggle-btn');
+        const filterContent = document.getElementById('collapsible-filters');
+
+        // Check if any filters are already active on page load
+        const hasFilters = urlParams.get('category') || urlParams.get('location') || urlParams.get('search') || (urlParams.get('sort_by') && urlParams.get('sort_by') !== 'freshness');
+        
+        if (hasFilters && filterContent) {
+            // If filters are active, show the bar by default
+            filterContent.classList.add('active');
+            toggleBtn.classList.add('active');
+            toggleBtn.querySelector('span').textContent = 'Filters Applied';
+        }
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                // When clicked, toggle the 'active' class on both elements
+                const isActive = filterContent.classList.toggle('active');
+                this.classList.toggle('active');
+                
+                // Update the button text
+                if (isActive) {
+                    this.querySelector('span').textContent = 'Hide Filters';
+                } else {
+                    if (hasFilters) {
+                        this.querySelector('span').textContent = 'Filters Applied';
+                    } else {
+                        this.querySelector('span').textContent = 'Show Filters';
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
