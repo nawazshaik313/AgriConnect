@@ -25,7 +25,7 @@ model = genai.GenerativeModel("models/gemini-2.5-pro")
 # -----------------------------
 
 # --- App Initialization & Configuration ---
-app = Flask(__name__, static_folder='static')
+app = Flask(__name__, static_folder=None)
 app.config['SECRET_KEY'] = 'a-very-secret-key-that-should-be-in-an-env-file'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///agriconnect.db'
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
@@ -738,11 +738,16 @@ def payment_page(order_id):
 # In app_complete.py, add this new route
 
 # In app_complete.py
+# In app_complete.py, add this new route with your other routes
+
 @app.route('/order/update-status/<int:order_id>', methods=['POST'])
 def update_order_status(order_id):
+    # Security check: Ensure user is a logged-in farmer
     if session.get('role') != 'farmer':
         flash('You do not have permission to perform this action.', 'danger')
         return redirect(url_for('index'))
+
+    # Get the new status from the form
     new_status = request.form.get('status')
     order = Order.query.get_or_404(order_id)
     
@@ -760,6 +765,8 @@ def update_order_status(order_id):
         # Update status and save
         order.status = new_status
         db.session.commit()
+        
+        # Send email notification to the customer
         send_email(
             user.email, 
             f"Your Order #{order.id} is now '{new_status}'", 
