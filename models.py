@@ -77,7 +77,7 @@ class Product(db.Model):
     category = db.Column(db.String(50), nullable=False)
     image_path = db.Column(db.String(200), nullable=False)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    
+    is_featured = db.Column(db.Boolean, default=False)
     farmer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     # --- Relationships ---
