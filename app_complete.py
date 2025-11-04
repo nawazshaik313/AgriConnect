@@ -27,7 +27,7 @@ model = genai.GenerativeModel("models/gemini-2.5-pro")
 # --- App Initialization & Configuration ---
 app = Flask(__name__, static_folder='static')
 app.config['SECRET_KEY'] = 'a-very-secret-key-that-should-be-in-an-env-file'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///agriconnect.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///agriconnect.db')
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 razorpay_client = razorpay.Client(
