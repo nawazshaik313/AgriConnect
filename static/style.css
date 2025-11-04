@@ -257,11 +257,11 @@ body {
     background-color: #d95a3a;
 }
 
-.btn-warning {
+.btn-warning ,.btn-success{
     background-color: var(--warning-color);
     color: var(--secondary-color);
 }
-.btn-warning:hover {
+.btn-warning:hover,.btn-success:hover {
     background-color: #d4b25a;
 }
 

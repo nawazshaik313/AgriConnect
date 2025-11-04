@@ -1187,18 +1187,25 @@ def download_invoice(order_id):
         }
     )
 
-# --- Main ---
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
+        # This command is safer for Flask-Migrate
+        # db.create_all() # You can remove this if you are using Flask-Migrate
+        
+        # --- Read Admin credentials from .env file ---
+        admin_email = os.getenv('ADMIN_EMAIL')
+        admin_pass = os.getenv('ADMIN_PASS')
+        # ---------------------------------------------
 
-        admin_email = 'admin@agriconnect.com'
-        if not User.query.filter_by(email=admin_email).first():
-            print(f"Admin user not found. Creating one with email: {admin_email}")
-            admin = User(name='Admin', email=admin_email, role='admin', status='approved')
-            admin.set_password('admin123')
-            db.session.add(admin)
-            db.session.commit()
-            print("✅ Admin user created successfully.")
+        if not admin_email or not admin_pass:
+            print("Error: ADMIN_EMAIL or ADMIN_PASS not set in .env file.")
+        else:
+            if not User.query.filter_by(email=admin_email).first():
+                print(f"Admin user not found. Creating one with email: {admin_email}")
+                admin = User(name='Admin', email=admin_email, role='admin', status='approved')
+                admin.set_password(admin_pass) # Use the password from .env
+                db.session.add(admin)
+                db.session.commit()
+                print("✅ Admin user created successfully.")
 
     app.run(debug=True)
