@@ -743,7 +743,6 @@ def update_order_status(order_id):
     if session.get('role') != 'farmer':
         flash('You do not have permission to perform this action.', 'danger')
         return redirect(url_for('index'))
-
     new_status = request.form.get('status')
     order = Order.query.get_or_404(order_id)
     
@@ -761,8 +760,6 @@ def update_order_status(order_id):
         # Update status and save
         order.status = new_status
         db.session.commit()
-        
-        # --- NEW: Send email notification to the customer ---
         send_email(
             user.email, 
             f"Your Order #{order.id} is now '{new_status}'", 
@@ -770,7 +767,6 @@ def update_order_status(order_id):
             user=user, 
             order=order
         )
-        # --------------------------------------------------
         
         flash(f"Order #{order.id} status updated to '{new_status}'.", "success")
     else:
