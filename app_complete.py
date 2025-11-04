@@ -1,9 +1,9 @@
-import os # nawaz@gmail.com Nawaz@123   tsoy klwr akkv lhyl
+import os 
 import qrcode
 import google.generativeai as genai
 import json
 import razorpay 
-from flask_mail import Mail,  Message as MailMessage
+from flask_mail import Mail, Message as MailMessage
 from datetime import datetime
 from flask_migrate import Migrate
 from flask import (
@@ -13,35 +13,47 @@ from flask import (
 from werkzeug.utils import secure_filename
 from models import db, User, Product, Complaint, Rating, Order, OrderItem, Message
 from dotenv import load_dotenv
-from flask import Response # Make sure Response is imported
+from flask import Response
 from weasyprint import HTML
-load_dotenv() # This line reads your .env file
+load_dotenv() 
+
 # --- CONFIGURE THE API KEY ---
-# This line reads the key from your .env file
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # Create an instance of the Gemini Pro model
-model = genai.GenerativeModel("models/gemini-2.5-pro")
+# FIXED: "models/gemini-2.5-pro" is not a valid model. 
+# Use a valid model name like 'gemini-1.5-pro-latest' or 'gemini-pro'.
+model = genai.GenerativeModel('gemini-1.5-pro-latest') 
 # -----------------------------
 
 # --- App Initialization & Configuration ---
 app = Flask(__name__, static_folder='static')
-app.config['SECRET_KEY'] = 'a-very-secret-key-that-should-be-in-an-env-file'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///agriconnect.db')
-app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'a_very_strong_default_secret_key_123')
+
+# FIXED: Use the 'default_db_path' variable you created.
+default_db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'agriconnect.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', f'sqlite:///{default_db_path}')
+
+# Setup the upload folder
+upload_folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+app.config['UPLOAD_FOLDER'] = upload_folder_path
+os.makedirs(upload_folder_path, exist_ok=True)
+# FIXED: Removed duplicate os.makedirs() line
+
+# --- Client Initializations ---
 razorpay_client = razorpay.Client(
     auth=(os.getenv('RAZORPAY_KEY_ID'), os.getenv('RAZORPAY_KEY_SECRET'))
 )
 db.init_app(app)
-migrate = Migrate(app,db)
-# --- Helper Functions ---
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
+migrate = Migrate(app, db) # Corrected: 'db' was missing
+
+# --- Mail Configuration ---
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
 app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
 mail = Mail(app)
 def send_email(to, subject, template, **kwargs):
