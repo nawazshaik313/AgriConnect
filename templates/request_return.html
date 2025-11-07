@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Request Return{% endblock %}
+{% block content %}
+<div class="form-container" style="max-width: 600px; margin: 2rem auto;">
+    <h2>Request Return for Order #{{ order.id }}</h2>
+    <p>We're sorry you had an issue with your order. Please describe the problem below.</p>
+    
+    <div class="farmer-profile-card">
+        <strong>Total Amount:</strong> ₹{{ order.total_amount|format_currency }}<br>
+        <strong>Status:</strong> {{ order.status }}
+    </div>
+
+    <form action="{{ url_for('request_return', order_id=order.id) }}" method="post">
+        <div class="form-group">
+            <label for="reason">Reason for Return</label>
+            <textarea id="reason" name="reason" class="form-input" rows="5" placeholder="e.g., Product was damaged, wrong item received, poor quality..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-danger" style="width: 100%;">Submit Return Request</button>
+    </form>
+    
+    <p class="form-footer">
+        <a href="{{ url_for('user_dashboard') }}">Back to Dashboard</a>
+    </p>
+</div>
+{% endblock %}

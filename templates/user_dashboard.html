@@ -4,73 +4,74 @@
 {% block content %}
 <div class="dashboard-container" style="max-width: 1200px; margin: 2rem auto;">
     <header class="dashboard-header">
-        <h1>My Dashboard</h1>
-        <div>
-            <a href="{{ url_for('product_marketplace') }}" class="btn btn-primary">Marketplace</a>
-            <a href="{{ url_for('view_wishlist') }}" class="btn btn-secondary">My Wishlist</a>
-            <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout ➔</a>
-        </div>
-    </header>
+    <h1>My Dashboard</h1>
+    <div>
+        <a href="{{ url_for('how_it_works_user') }}" class="btn btn-secondary">How it Works</a>=
+        <a href="{{ url_for('product_marketplace') }}" class="btn btn-primary">Marketplace</a>
+        <a href="{{ url_for('view_wishlist') }}" class="btn btn-secondary">My Wishlist</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout ➔</a>
+    </div>
+</header>
     
     <div class="content-area">
         <div class="tabs">
             <button class="tab-link active" onclick="openTab(event, 'Orders')">My Orders</button>
             <button class="tab-link" onclick="openTab(event, 'Profile')">My Profile</button>
             <button class="tab-link" onclick="openTab(event, 'Rate')">Rate a Farmer</button>
+            <button class="tab-link" onclick="openTab(event, 'Complaints')">My Complaints</button>
         </div>
 
         <div id="Orders" class="tab-content" style="display: block;">
-    <h3>Your Order History</h3>
-    {% if orders %}
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Date</th>
-                        <th>Total Amount</th>
-                        <th>Payment</th>
-                        <th>Status</th>
-                        <th>Invoice</th> </tr>
-                </thead>
-                <tbody>
-                    {% for order in orders %}
-                    <tr>
-                        <td><strong>#{{ order.id }}</strong></td>
-                        <td>{{ order.order_date.strftime('%Y-%m-%d') }}</td>
-                        <td>₹{{ order.total_amount|format_currency }}</td>
-                        <td>{{ order.payment_method }}</td>
-                        <td>
-                            <span class="status-badge status-{{ order.status.lower() }}">
-                                {{ order.status }}
-                            </span>
-                        </td>
-                        <td>
-                            <a href="{{ url_for('download_invoice', order_id=order.id) }}" class="btn btn-secondary btn-sm">Download</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <h3>Your Order History</h3>
+            {% if orders %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Total Amount</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                                <th>Invoice</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td><strong>#{{ order.id }}</strong></td>
+                                <td>{{ order.order_date.strftime('%Y-%m-%d') }}</td>
+                                <td>₹{{ order.total_amount|format_currency }}</td>
+                                <td>{{ order.payment_method }}</td>
+                                <td>
+                                    <span class="status-badge status-{{ order.status.lower() }}">
+                                        {{ order.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('download_invoice', order_id=order.id) }}" class="btn btn-secondary btn-sm">Download</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="empty-message">You haven't placed any orders yet. 🛒</p>
+            {% endif %}
         </div>
-    {% else %}
-        <p class="empty-message">You haven't placed any orders yet. 🛒</p>
-    {% endif %}
-</div>
 
         <div id="Profile" class="tab-content">
             <h3>Your Profile</h3>
-            <div class="farmer-profile-card">
+            <div class="farmer-profile-card"> 
                 <p><span>Name:</span> {{ user.name }}</p>
                 <p><span>Email:</span> {{ user.email }}</p>
-                
                 <h4 style="margin-top: 2rem;">Saved Address:</h4>
                 <p><span>Phone:</span> {{ user.phone or 'Not set' }}</p>
                 <p><span>Address:</span> {{ user.address_line1 or 'Not set' }}</p>
                 <p><span>City:</span> {{ user.city or 'Not set' }}</p>
                 <p><span>State:</span> {{ user.state or 'Not set' }}</p>
                 <p><span>Pincode:</span> {{ user.pincode or 'Not set' }}</p>
-                
                 <div style="margin-top: 1.5rem;">
                     <a href="{{ url_for('edit_user_profile') }}" class="btn btn-primary">Edit Profile</a>
                 </div>
@@ -82,10 +83,46 @@
             <p>You can rate a farmer you've purchased from.</p>
             <a href="{{ url_for('rate_farmer_page') }}" class="btn btn-primary">Rate a Farmer</a>
         </div>
-    </div>
-</div>
 
-<script>
+        <div id="Complaints" class="tab-content">
+            <h3>Your Submitted Complaints</h3>
+            {% if complaints %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Reported Farmer</th>
+                                <th>Your Complaint</th>
+                                <th>Status</th>
+                                <th>Proof</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for complaint in complaints %}
+                            <tr>
+                                <td>{{ complaint.timestamp.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ complaint.reported_farmer.name }}</td>
+                                <td style="white-space: pre-wrap; max-width: 300px;">{{ complaint.complaint_text }}</td>
+                                <td>
+                                    <span class="status-badge status-{{ complaint.status.lower() }}">
+                                        {{ complaint.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('uploaded_file', filename=complaint.proof_path.split('/')[-1].split('\\')[-1]) }}" target="_blank">View Proof</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="empty-message">You have not filed any complaints yet.</p>
+            {% endif %}
+            <a href="{{ url_for('report_complaint') }}" class="btn btn-danger" style="margin-top: 1.5rem;">File a New Complaint</a>
+        </div>
+        </div> </div> <script>
     function openTab(evt, tabName) {
         var i, tabcontent, tablinks;
         tabcontent = document.getElementsByClassName("tab-content");

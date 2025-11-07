@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}How It Works - For Farmers | AgriConnect{% endblock %}
+
+{% block content %}
+<div class="dashboard-container" style="max-width: 900px; margin: 2rem auto;">
+    <header class="dashboard-header">
+        <h1>How AgriConnect Works — For Farmers</h1>
+        {% if g.user and g.user.role == 'farmer' %}
+            <a href="{{ url_for('farmer_dashboard') }}" class="btn btn-logout">← Back to Dashboard</a>
+        {% else %}
+            <a href="{{ url_for('index') }}" class="btn btn-logout">← Back Home</a>
+        {% endif %}
+    </header>
+
+    <div class="content-area">
+        <div class="farmer-profile-card">
+            <h4>1. Register for Verification</h4>
+            <p>Create a "Farmer" account from the homepage. You must submit your contact details, a Government ID, and proof of agriculture (like land papers) so our admins can verify you.</p>
+
+            <h4 style="margin-top: 1.5rem;">2. Get Approved</h4>
+            <p>You will receive an email once our admin team has approved your application. Once approved, you can log in to your Farmer Dashboard.</p>
+
+            <h4 style="margin-top: 1.5rem;">3. Add Your Products</h4>
+            <p>In your dashboard, you can add new products, including name, description, category, price, quantity, and photo. You can also use the <strong>AI Tools</strong> to get smart price recommendations based on your location and live market rates!</p>
+
+            <h4 style="margin-top: 1.5rem;">4. Manage Your Sales</h4>
+            <p>When a customer places an order, you will receive an email. You can see all your new orders in the "My Orders" tab. From here, you can update the order status from "Processing" to "Shipped" and "Delivered" to keep the customer updated.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

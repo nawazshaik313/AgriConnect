@@ -115,8 +115,11 @@ class Order(db.Model):
     shipping_address = db.Column(db.Text, nullable=False)
     razorpay_order_id = db.Column(db.String(100), nullable=True, index=True)
     razorpay_payment_id = db.Column(db.String(100), nullable=True)
+    return_requested = db.Column(db.Boolean, default=False)
+    return_reason = db.Column(db.Text, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     items = db.relationship('OrderItem', backref='order', lazy=True, cascade="all, delete-orphan")
+
 
 # --- OrderItem Model ---
 class OrderItem(db.Model):

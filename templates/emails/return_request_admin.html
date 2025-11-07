@@ -1,0 +1,8 @@
+<h3>New Return Request: Order #{{ order.id }}</h3>
+<p>A customer has requested a return for Order #{{ order.id }}.</p>
+<hr>
+<p><strong>Customer:</strong> {{ user.name }} ({{ user.email }})</p>
+<p><strong>Reason:</strong></p>
+<pre>{{ order.return_reason }}</pre>
+<hr>
+<p>Please log in to your admin dashboard to approve or reject this request.</p>

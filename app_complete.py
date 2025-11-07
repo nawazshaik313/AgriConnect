@@ -6,6 +6,7 @@ import razorpay
 from flask_mail import Mail, Message as MailMessage
 from datetime import datetime
 from flask_migrate import Migrate
+from flask_migrate import upgrade as migrate_upgrade
 from flask import (
     Flask, render_template, request, redirect,
     url_for, session, send_from_directory, flash, g
@@ -289,7 +290,8 @@ def admin_dashboard():
     total_farmers = User.query.filter_by(role='farmer').count()
 
     complaints = Complaint.query.order_by(Complaint.timestamp.desc()).all()
-
+    return_requests = Order.query.filter_by(return_requested=True, status="Return Requested").order_by(Order.order_date.desc()).all()
+    
     return render_template(
         'admin_dashboard.html',
         farmer_count=total_farmers,
@@ -792,42 +794,45 @@ def update_order_status(order_id):
         flash("Could not update order status.", "danger")
 
     return redirect(url_for('farmer_dashboard'))
+# In app_complete.py
+
 @app.route('/farmer-dashboard/ai-tools', methods=['GET', 'POST'])
 def ai_tools():
     if session.get('role') != 'farmer':
         return redirect(url_for('index'))
     
-    # Get farmer's location for the initial page load (passed from farmer_dashboard)
     farmer = User.query.filter_by(email=session['user_email']).first()
     farmer_city = farmer.city
     farmer_state = farmer.state
     
     price_rec = None
     demand_forecast = None
+    category = None # <-- NEW: Variable to hold the category
     
     if request.method == 'POST':
-        # Get location from hidden fields
         city_from_form = request.form.get('farmer_city')
         state_from_form = request.form.get('farmer_state')
         
         if 'submit_price' in request.form:
             base_price = float(request.form.get('base_price', 0))
-            category = request.form.get('category', 'General')
+            category = request.form.get('category', 'General') # <-- NEW: Store the category
             price_rec = get_ai_price_recommendation(category, base_price, city_from_form, state_from_form)
             
         elif 'submit_forecast' in request.form:
             category = request.form.get('forecast_category', 'General')
             demand_forecast = get_ai_demand_forecast(category, city_from_form, state_from_form)
             
-    # Pass farmer's location again for the template rendering
     return render_template('ai_tools.html', 
                            price_rec=price_rec, 
                            demand_forecast=demand_forecast,
                            farmer_city=farmer_city,
-                           farmer_state=farmer_state)
+                           farmer_state=farmer_state,
+                           category=category # <-- NEW: Pass category to template
+                           )
+# In app_complete.py
 
 def get_ai_price_recommendation(category, base_price, city, state):
-    """Calls the Gemini Pro API for a location-aware price recommendation."""
+    """Calls the Gemini Pro API to generate a full product listing."""
     if not isinstance(base_price, (int, float)) or base_price <= 0:
         return {'error': 'Invalid base price.'}
 
@@ -835,33 +840,85 @@ def get_ai_price_recommendation(category, base_price, city, state):
     location = f"{city}, {state}, India" if city and state else "India"
     
     prompt = f"""
-    As an agricultural market analyst in India on {current_date}, provide a price recommendation for a product in the category '{category}' with a farmer's base price of ₹{base_price}.
-    The farmer is located in {location}.
-    Your analysis must focus on:
-    1. The current **live market price** for '{category}' specifically in the {location} region.
-    2. A recommended selling price for the farmer considering their base price, the live rate, local demand, seasonality, and competition in {location}.
-    Return your response ONLY as a JSON object with three keys:
-    1. "live_market_price": a string describing the current average market price in the farmer's location (e.g., "₹2400 - ₹2650 per quintal in Ballari").
-    2. "recommended_price": a float for the suggested price.
-    3. "reasoning": a brief, one-sentence explanation referencing the location.
+    As an agricultural market expert in India on {current_date}, analyze the following:
+    - Product Category: '{category}'
+    - Farmer's Base Price: ₹{base_price}
+    - Farmer's Location: {location}
+
+    Your task is to generate a complete product listing. Return ONLY a JSON object with these exact keys:
+    1. "product_name": A short, attractive product name (e.g., "Fresh Red Onions (Ballari)").
+    2. "product_description": A brief, one-sentence description (e.g., "Locally sourced, perfect for cooking.").
+    3. "live_market_price": The current average market price in the farmer's location (e.g., "₹2400 - ₹2650 per quintal").
+    4. "recommended_price": A float for the suggested selling price.
+    5. "reasoning": A brief explanation for your recommendation.
     """
     
     try:
         response = model.generate_content(prompt)
         cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
-        # Add farmer's city back into the response for display
         result = json.loads(cleaned_text)
-        result['location'] = city 
         return result
     except Exception as e:
         print(f"Error calling Gemini API for price: {e}")
+        # Fallback with basic generated content
         return {
+            'product_name': f"Fresh {category}",
+            'product_description': f"High-quality {category} from a local farmer.",
             'live_market_price': "N/A",
             'recommended_price': round(base_price * 1.1, 2),
-            'reasoning': "API error, using default calculation.",
-            'location': city
+            'reasoning': "API error, using default calculation."
         }
+    # In app_complete.py, add this new route
 
+@app.route('/ai-add-product', methods=['POST'])
+def ai_add_product():
+    """Handles the form submitted from the AI tools page."""
+    if session.get('role') != 'farmer':
+        flash('You must be logged in as a farmer to add products.', 'danger')
+        return redirect(url_for('index'))
+    
+    farmer = User.query.filter_by(email=session['user_email']).first()
+    if not farmer:
+        flash("Your session is invalid, please log in again.", "warning")
+        return redirect(url_for('logout'))
+    
+    # Get all the data from the form (hidden and visible fields)
+    name = request.form.get('name')
+    description = request.form.get('description')
+    price = request.form.get('price')
+    quantity = request.form.get('quantity')
+    category = request.form.get('category')
+    image_file = request.files.get('image')
+
+    # Validation
+    if not all([name, description, price, quantity, category, image_file]):
+        flash("All fields, including an image, are required.", "danger")
+        return redirect(url_for('ai_tools'))
+    
+    if not allowed_file(image_file.filename):
+        flash("Invalid image file type. Please use PNG, JPG, or JPEG.", "danger")
+        return redirect(url_for('ai_tools'))
+
+    # Save the image file
+    filename = secure_filename(f"product_{farmer.id}_{image_file.filename}")
+    image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    image_file.save(image_path)
+
+    # Create the new product in the database
+    new_product = Product(
+        name=name,
+        description=description,
+        price=float(price),
+        quantity=int(quantity),
+        category=category,
+        image_path=image_path,
+        farmer_id=farmer.id
+    )
+    db.session.add(new_product)
+    db.session.commit()
+
+    flash(f"Success! '{name}' has been added to the marketplace.", "success")
+    return redirect(url_for('farmer_dashboard'))
 def get_ai_demand_forecast(category, city, state):
     """Calls the Gemini Pro API for a location-aware demand forecast."""
     current_date = datetime.now().strftime("%B %d, %Y")
@@ -981,31 +1038,6 @@ def add_to_cart(product_id):
     
     # We already know the product exists, so this is now safe
     return redirect(url_for('product_marketplace', added=product.name))
-# In app_complete.py, add this in the "User Routes" section
-
-# In app_complete.py
-
-@app.route('/user-dashboard')
-def user_dashboard():
-    # Security check: Ensure user is logged in with the correct role
-    if 'user_email' not in session or session.get('role') != 'user':
-        flash('You must be logged in as a user to view this page.', 'danger')
-        # Redirect to the homepage, NOT 'login', to prevent a loop
-        return redirect(url_for('index')) 
-
-    user = User.query.filter_by(email=session['user_email']).first()
-
-    # --- THIS IS THE CRITICAL FIX ---
-    # Check if the user from the session still exists in the database
-    if not user:
-        flash("Your session is invalid. Please log in again.", "warning")
-        return redirect(url_for('logout')) # Log them out
-    # -------------------------------
-
-    # Fetch all orders placed by this user, most recent first
-    orders = Order.query.filter_by(user_id=user.id).order_by(Order.order_date.desc()).all()
-
-    return render_template('user_dashboard.html', user=user, orders=orders)
 @app.before_request
 def load_logged_in_user():
     """Load the current user from the session into the 'g' object."""
@@ -1076,13 +1108,6 @@ def view_wishlist():
     return render_template('wishlist.html', 
                            wishlist_items=items,
                            wishlist_product_ids=wishlist_product_ids)
-# In app_complete.py, update the product_marketplace function
-
-# In app_complete.py
-
-# In app_complete.py
-
-# In app_complete.py
 
 @app.route('/products')
 def product_marketplace():
@@ -1198,26 +1223,172 @@ def download_invoice(order_id):
             "Content-Disposition": f"attachment;filename=invoice_{order.id}.pdf"
         }
     )
+@app.route('/user-dashboard')
+def user_dashboard():
+    # Security check: Ensure user is logged in with the correct role
+    if 'user_email' not in session or session.get('role') != 'user':
+        flash('You must be logged in as a user to view this page.', 'danger')
+        return redirect(url_for('index')) 
 
-if __name__ == '__main__':
-    with app.app_context():
-        # This command is safer for Flask-Migrate
-        # db.create_all() # You can remove this if you are using Flask-Migrate
+    user = User.query.filter_by(email=session['user_email']).first()
+
+    if not user:
+        flash("Your session is invalid. Please log in again.", "warning")
+        return redirect(url_for('logout'))
+
+    # Fetch all orders placed by this user
+    orders = Order.query.filter_by(user_id=user.id).order_by(Order.order_date.desc()).all()
+    
+    # --- NEW: Fetch all complaints made by this user ---
+    complaints = Complaint.query.filter_by(user_id=user.id).order_by(Complaint.timestamp.desc()).all()
+    # ----------------------------------------------------
+
+    return render_template(
+        'user_dashboard.html', 
+        user=user, 
+        orders=orders,
+        complaints=complaints  # Pass the complaints list to the template
+    )
+# In app_complete.py, add these new routes
+
+# --- NEW: Route for the FAQ page ---
+@app.route('/faq')
+def faq_page():
+    """Renders the static FAQ and Guidelines page."""
+    return render_template('faq.html')
+
+# --- NEW: Route for the Contact Support page ---
+@app.route('/contact-support', methods=['GET', 'POST'])
+def contact_support():
+    if request.method == 'POST':
+        user_name = "Guest"
+        user_email = request.form.get('email')
+        subject = request.form.get('subject')
+        message_body = request.form.get('message')
         
-        # --- Read Admin credentials from .env file ---
+        # If the user is logged in, use their real name
+        if g.user:
+            user_name = g.user.name
+            user_email = g.user.email
+
+        if not all([user_email, subject, message_body]):
+            flash("All fields are required.", "danger")
+            return redirect(url_for('contact_support'))
+
+        # Prepare and send the email to the admin
         admin_email = os.getenv('ADMIN_EMAIL')
-        admin_pass = os.getenv('ADMIN_PASS')
-        # ---------------------------------------------
+        email_subject = f"Support Ticket: {subject}"
+        
+        # Send email to admin
+        send_email(
+            admin_email, 
+            email_subject, 
+            'emails/contact_support_email.html', 
+            user_name=user_name, 
+            user_email=user_email, 
+            message_body=message_body
+        )
+        
+        flash("Your message has been sent. Our support team will get back to you shortly.", "success")
+        return redirect(url_for('index'))
 
-        if not admin_email or not admin_pass:
-            print("Error: ADMIN_EMAIL or ADMIN_PASS not set in .env file.")
+    return render_template('contact_support.html')
+
+# --- NEW: Route for a user to request a return ---
+@app.route('/request-return/<int:order_id>', methods=['GET', 'POST'])
+def request_return(order_id):
+    if not g.user:
+        flash("You must be logged in to request a return.", "warning")
+        return redirect(url_for('login'))
+
+    order = Order.query.get_or_404(order_id)
+
+    # Security check: Ensure the user owns this order
+    if order.user_id != g.user.id:
+        flash("You do not have permission to modify this order.", "danger")
+        return redirect(url_for('user_dashboard'))
+
+
+# --- NEW: Route for the tutorials page ---
+@app.route('/how-it-works/user')
+def how_it_works_user():
+    """How It Works page for Users"""
+    return render_template('tutorials_user.html')
+
+
+@app.route('/how-it-works/farmer')
+def how_it_works_farmer():
+    """How It Works page for Farmers"""
+    return render_template('tutorials_farmer.html')
+
+# -----------------------------------------
+# #   if request.method == 'POST':
+#         reason = request.form.get('reason')
+#         if not reason:
+#             flash("You must provide a reason for the return.", "danger")
+#             return redirect(url_for('request_return', order_id=order.id))
+        
+#         # Update the order with the return request
+#         order.return_requested = True
+#         order.return_reason = reason
+#         order.status = "Return Requested"
+#         db.session.commit()
+
+#         # Notify the admin
+#         admin_email = os.getenv('ADMIN_EMAIL')
+#         send_email(
+#             admin_email,
+#             f"New Return Request for Order #{order.id}",
+#             'emails/return_request_admin.html',
+#             user=g.user,
+#             order=order
+#         )
+
+#         flash("Your return request has been submitted for review.", "success")
+#         return redirect(url_for('user_dashboard'))
+
+#     return render_template('request_return.html', order=order)
+
+mail = Mail(app)
+
+# ====================================================================
+# THIS IS THE CORRECTED STARTUP BLOCK
+# ====================================================================
+with app.app_context():
+    # Use db.create_all() to ensure all tables exist
+    # This is simpler and more reliable for local development
+    print("Ensuring database tables exist...")
+    db.create_all()
+    print("Database tables are ready.")
+
+    # Get admin credentials from Environment Variables
+    admin_email = os.getenv('ADMIN_EMAIL')
+    admin_pass = os.getenv('ADMIN_PASS')
+
+    if admin_email and admin_pass:
+        # Check if the admin user already exists
+        if not User.query.filter_by(email=os.getenv('ADMIN_EMAIL')).first():
+            print(f"Admin user not found. Creating one with email: {os.getenv('ADMIN_EMAIL')}")
+            admin = User(name='Admin', email=os.getenv('ADMIN_EMAIL'), role='admin', status='approved')
+            admin.set_password(os.getenv('ADMIN_PASS'))
+            db.session.add(admin)
+            db.session.commit()
+            print("✅ Admin user created successfully.")
         else:
-            if not User.query.filter_by(email=admin_email).first():
-                print(f"Admin user not found. Creating one with email: {admin_email}")
-                admin = User(name='Admin', email=admin_email, role='admin', status='approved')
-                admin.set_password(admin_pass) # Use the password from .env
-                db.session.add(admin)
-                db.session.commit()
-                print("✅ Admin user created successfully.")
+            print("ℹ️ Admin user already exists.")
+    else:
+        print("⚠️ WARNING: ADMIN_EMAIL or ADMIN_PASS not set. Admin user not created.")
+# ====================================================================
 
+# ... (This should be followed by your @app.route functions) ...
+# ====================================================================
+
+
+# ====================================================================
+# THIS BLOCK IS ONLY FOR RUNNING THE APP LOCALLY
+# ====================================================================
+if __name__ == '__main__':
+    # This just runs the development server on your local machine.
+    # Gunicorn does not run this block.
     app.run(debug=True)
+# ====================================================================

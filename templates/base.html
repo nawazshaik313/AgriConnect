@@ -9,9 +9,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+
+    <script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+            {
+                pageLanguage: 'en', // Your site's default language
+                // This makes the dropdown simple
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE 
+            }, 
+            'google_translate_element' // The ID of the div to use
+        );
+    }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    </head>
 <body>
 
+    <div id="google_translate_element" class="google-translate-widget"></div>
     <div class="flash-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -44,6 +59,8 @@
     
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // This is part of your static/script.js, but good to have here
+        // If your script.js is loaded, this will just re-apply
         const allToggles = document.querySelectorAll('.toggle-password');
         allToggles.forEach(toggle => {
             toggle.addEventListener('click', function () {

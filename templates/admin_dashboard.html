@@ -55,8 +55,43 @@
         <button class="tab-link" onclick="openTab(event, 'Approved')">Approved Farmers</button>
         <button class="tab-link" onclick="openTab(event, 'Rejected')">Rejected Farmers</button>
         <button class="tab-link" onclick="openTab(event, 'Complaints')">User Complaints</button>
+        <button class="tab-link" onclick="openTab(event, 'Returns')">Return Requests</button>
+</div>
     </div>
-
+<div id="Returns" class="tab-content">
+    <h3>Pending Return Requests</h3>
+    {% if return_requests %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>User</th>
+                        <th>Reason for Return</th>
+                        <th>Shipping Address</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in return_requests %}
+                    <tr>
+                        <td><strong>#{{ order.id }}</strong></td>
+                        <td>{{ order.user.name }}<br><small>{{ order.user.email }}</small></td>
+                        <td style="white-space: pre-wrap; max-width: 300px;">{{ order.return_reason }}</td>
+                        <td style="white-space: pre-wrap;">{{ order.shipping_address }}</td>
+                        <td class="actions">
+                            <a href="#" class="btn btn-success">Approve</a>
+                            <a href="#" class="btn btn-danger">Reject</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="empty-message">No pending return requests.</p>
+    {% endif %}
+</div>
     <div id="Pending" class="tab-content" style="display: block;">
         {% if pending_farmers %}
             <div class="table-wrapper">

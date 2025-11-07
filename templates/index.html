@@ -3,14 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriConnect | Welcome</title>
+    <title>AgriTrust | Welcome</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- 🌐 Google Translate Script -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement(
+                {
+                    pageLanguage: 'en',
+                    includedLanguages: 'hi,te,ta,kn,ml,mr,bn,gu', // Indian languages
+                    layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
+                },
+                'google_translate_element'
+            );
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </head>
+
 <body class="login-page">
-    
+
+    <!-- 🔔 Flash Messages -->
     <div class="flash-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -21,11 +38,17 @@
         {% endwith %}
     </div>
 
+    <!-- 🌐 Language Selector -->
+    <div id="google_translate_element" style="text-align: right; margin: 10px 20px;"></div>
+
     <div class="form-container">
+
+        <!-- 🟢 Login View -->
         <div id="login-view" class="view active">
             <form class="form-box" method="POST" action="{{ url_for('login') }}">
                 <h2 class="form-title">Welcome Back</h2>
                 <p class="form-subtitle">Login to access your account</p>
+
                 <div class="form-group">
                     <input type="text" name="email" placeholder="Email or Admin Username" required>
                 </div>
@@ -33,6 +56,7 @@
                     <input type="password" id="login-pass" name="password" placeholder="Password" required>
                     <span class="toggle-password">Show</span>
                 </div>
+
                 <button type="submit" class="submit-btn">Login</button>
                 <p class="form-switch">
                     New here? <a href="#" id="show-register-chooser">Create an Account</a>
@@ -40,6 +64,7 @@
             </form>
         </div>
 
+        <!-- 🟣 Choose Registration Role -->
         <div id="register-chooser-view" class="view">
             <div class="form-box">
                 <h2 class="form-title">Join Us</h2>
@@ -52,56 +77,45 @@
             </div>
         </div>
 
+        <!-- 🧑 User Register -->
         <div id="user-register-view" class="view">
             <form class="form-box" method="POST" action="{{ url_for('register_user') }}" enctype="multipart/form-data">
                 <h2 class="form-title">Create User Account</h2>
-                <div class="form-group">
-                    <input type="text" name="name" placeholder="Full Name" required>
-                </div>
-                <div class="form-group">
-                    <input type="email" name="email" placeholder="Email Address" required>
-                </div>
+
+                <div class="form-group"><input type="text" name="name" placeholder="Full Name" required></div>
+                <div class="form-group"><input type="email" name="email" placeholder="Email Address" required></div>
+                <div class="form-group"><input type="tel" name="phone" placeholder="Phone Number" required></div>
+                <div class="form-group"><input type="text" name="city" placeholder="City" required></div>
+                <div class="form-group"><input type="text" name="place" placeholder="Place / Full Address" required></div>
                 
-                <div class="form-group">
-                    <input type="tel" name="phone" placeholder="Phone Number" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" name="city" placeholder="City" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" name="place" placeholder="Place / Full Address" required>
-                </div>
                 <div class="form-group password-wrapper">
                     <input type="password" id="user-pass" name="password" placeholder="Create Password Ex:Password@123" required>
                     <span class="toggle-password">Show</span>
                 </div>
+
                 <button type="submit" class="submit-btn">Register</button>
                 <p class="form-switch">
                     Go back to <a href="#" class="show-login">Login</a>
                 </p>
             </form>
-            </div> <div id="farmer-register-view" class="view">
+        </div>
+
+        <!-- 🌾 Farmer Register -->
+        <div id="farmer-register-view" class="view">
             <form class="form-box" method="POST" action="{{ url_for('register_farmer') }}" enctype="multipart/form-data">
                 <h2 class="form-title">Create Farmer Account</h2>
-                <div class="form-group">
-                    <input type="text" name="name" placeholder="Full Name" required>
-                </div>
-                <div class="form-group">
-                    <input type="email" name="email" placeholder="Email Address" required>
-                </div>
-                <div class="form-group">
-                    <input type="tel" name="phone" placeholder="Phone Number" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" name="city" placeholder="City" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" name="place" placeholder="Place / Farm Address" required>
-                </div>
+
+                <div class="form-group"><input type="text" name="name" placeholder="Full Name" required></div>
+                <div class="form-group"><input type="email" name="email" placeholder="Email Address" required></div>
+                <div class="form-group"><input type="tel" name="phone" placeholder="Phone Number" required></div>
+                <div class="form-group"><input type="text" name="city" placeholder="City" required></div>
+                <div class="form-group"><input type="text" name="place" placeholder="Place / Farm Address" required></div>
+                
                 <div class="form-group password-wrapper">
                     <input type="password" id="farmer-pass" name="password" placeholder="Create Password Ex:Password@123" required>
                     <span class="toggle-password">Show</span>
                 </div>
+
                 <div class="form-group file-upload">
                     <label for="govt_id">1. Government ID (Aadhaar, Voter ID, etc.)</label>
                     <input type="file" id="govt_id" name="govt_id" accept=".pdf,.jpg,.png,.jpeg" required>
@@ -110,14 +124,16 @@
                     <label for="agri_proof">2. Agriculture Proof (Land Paper, etc.)</label>
                     <input type="file" id="agri_proof" name="agri_proof" accept=".pdf,.jpg,.png,.jpeg" required>
                 </div>
+
                 <button type="submit" class="submit-btn">Register for Verification</button>
                 <p class="form-switch">
                     Go back to <a href="#" class="show-login">Login</a>
                 </p>
             </form>
         </div>
+
     </div>
-    
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

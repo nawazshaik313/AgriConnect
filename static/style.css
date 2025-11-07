@@ -1054,3 +1054,93 @@ td a:hover { text-decoration: underline; }
 .status-badge.status-delivered {
     background-color: #28a745; /* Green */
 }
+.info-links {
+    margin-top: 10px;
+    font-size: 0.95rem;
+}
+
+.info-link {
+    color: #2d7a2d;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.info-link:hover {
+    text-decoration: underline;
+    color: #1a5e1a;
+}
+/* =================================== */
+/* Styles for Google Translate Widget  */
+/* =================================== */
+
+.google-translate-widget {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
+/* Hides the default Google "Powered by" text to keep it clean */
+.goog-te-banner-frame.skiptranslate {
+    display: none !important;
+} 
+
+body {
+    top: 0px !important; 
+    /* Fixes an issue where Google Translate adds a 40px top margin */
+}
+/* =================================== */
+/* 12. Google Translate Widget Styles  */
+/* =================================== */
+
+/* This is the container for the widget */
+#google_translate_element {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.75rem;
+}
+
+/* This styles the dropdown itself (the <select> element) */
+#google_translate_element .goog-te-combo {
+    /* We make it look just like your other buttons */
+    background-color: #f8f9fa;
+    color: #495057;
+    border: 1px solid #dee2e6;
+    padding: 0.75rem 1rem; /* Matched to btn-logout */
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s;
+}
+#google_translate_element .goog-te-combo:hover {
+    background-color: #e9ecef;
+}
+
+/* --- Clean-up styles to hide Google's extra UI --- */
+
+/* Hides the "Powered by Google" text */
+.goog-te-gadget-simple .goog-te-menu-value span {
+    display: none;
+}
+/* Adds our own "Language" text */
+.goog-te-gadget-simple .goog-te-menu-value::before {
+    content: 'Language';
+    padding-right: 0.5em;
+    color: #495057;
+}
+
+/* Hides the Google logo */
+.goog-te-gadget-icon {
+    display: none !important;
+}
+
+/* Hides the "Powered by Google" banner that appears at the top */
+.goog-te-banner-frame.skiptranslate {
+    display: none !important;
+} 
+
+/* Fixes the page jump issue when the banner tries to load */
+body {
+    top: 0px !important; 
+}

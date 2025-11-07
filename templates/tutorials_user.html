@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}How It Works - For Users | AgriConnect{% endblock %}
+
+{% block content %}
+<div class="dashboard-container" style="max-width: 900px; margin: 2rem auto;">
+    <header class="dashboard-header">
+        <h1>How AgriConnect Works — For Users</h1>
+        {% if g.user and g.user.role == 'user' %}
+            <a href="{{ url_for('user_dashboard') }}" class="btn btn-logout">← Back to Dashboard</a>
+        {% else %}
+            <a href="{{ url_for('index') }}" class="btn btn-logout">← Back Home</a>
+        {% endif %}
+    </header>
+
+    <div class="content-area">
+        <div class="farmer-profile-card">
+            <h4>1. Register & Browse</h4>
+            <p>Create a "User" account from the homepage. Once logged in, you can click "Marketplace" to browse all available products from our verified farmers.</p>
+
+            <h4 style="margin-top: 1.5rem;">2. Filter & Find</h4>
+            <p>Use the "Show Filters" button to find exactly what you need. You can search by product name, category, or the farmer's location.</p>
+
+            <h4 style="margin-top: 1.5rem;">3. Order & Pay</h4>
+            <p>Add items to your cart and proceed to checkout. You can fill in your delivery address and choose to pay with Cash on Delivery (COD) or securely online with UPI, cards, and more.</p>
+
+            <h4 style="margin-top: 1.5rem;">4. Track & Rate</h4>
+            <p>In your "My Dashboard," you can see your order history and track the status (e.g., Processing, Shipped). After you receive your order, you can leave a rating for the farmer from the "Rate a Farmer" tab.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
