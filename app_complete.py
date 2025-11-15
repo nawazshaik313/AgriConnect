@@ -1,9 +1,15 @@
 import os 
+import base64
 import qrcode
 import google.generativeai as genai
 import json
 import razorpay 
-from flask_mail import Mail, Message as MailMessage
+from email.message import EmailMessage
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from datetime import datetime
 from flask_migrate import Migrate
 from flask_migrate import upgrade as migrate_upgrade
@@ -11,6 +17,9 @@ from flask import (
     Flask, render_template, request, redirect,
     url_for, session, send_from_directory, flash, g
 )
+# In app_complete.py
+from itsdangerous import URLSafeTimedSerializer # <-- ADD THIS IMPORT
+# ... (all your other imports)
 from werkzeug.utils import secure_filename
 from models import db, User, Product, Complaint, Rating, Order, OrderItem, Message
 from dotenv import load_dotenv
@@ -49,20 +58,45 @@ db.init_app(app)
 migrate = Migrate(app, db) # Corrected: 'db' was missing
 
 # --- Mail Configuration ---
-app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
-app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
-app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
-mail = Mail(app)
 def send_email(to, subject, template, **kwargs):
-    """Generic email sending function."""
-    msg = MailMessage(subject, recipients=[to]) # Use the new alias
-    msg.html = render_template(template, **kwargs)
+    """Uses the Gmail API to send an email."""
+    
+    # Load credentials from the environment variable
+    token_json_str = os.getenv('GMAIL_TOKEN_JSON')
+    if not token_json_str:
+        print("Error: GMAIL_TOKEN_JSON environment variable not set.")
+        return
+    
     try:
-        mail.send(msg)
+        # Create credentials from the token.json string
+        creds_info = json.loads(token_json_str)
+        creds = Credentials.from_authorized_user_info(creds_info, ["https://www.googleapis.com/auth/gmail.send"])
+        
+        # If token is expired, refresh it
+        if not creds.valid and creds.refresh_token:
+            creds.refresh(Request())
+            # IMPORTANT: You would need to re-save the new token data
+            # For simplicity, we'll skip this in a server environment
+            # but it's a good practice to handle token rotation.
+
+        service = build("gmail", "v1", credentials=creds)
+        html_content = render_template(template, **kwargs)
+        
+        message = EmailMessage()
+        message.set_content("This is a fallback for email clients that do not support HTML.")
+        message.add_alternative(html_content, subtype="html")
+        message["To"] = to
+        message["From"] = os.getenv('MAIL_DEFAULT_SENDER') # You can keep this env var
+        message["Subject"] = subject
+        
+        # Encode the message in base64
+        encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+        
+        create_message = {"raw": encoded_message}
+        
+        # Send the email
+        service.users().messages().send(userId="me", body=create_message).execute()
         print(f"Email sent successfully to {to}")
     except Exception as e:
         print(f"Error sending email: {e}")
@@ -119,6 +153,77 @@ def logout():
     session.clear()
     flash("You have been logged out.", "success")
     return redirect(url_for('index'))
+
+# In app_complete.py (after your /logout route)
+
+def get_password_reset_serializer(salt='password-reset-salt'):
+    """Returns a timed serializer for password reset tokens."""
+    return URLSafeTimedSerializer(app.config['SECRET_KEY'], salt=salt)
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    """Renders the 'forgot password' form and handles email submission."""
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user = User.query.filter_by(email=email).first()
+
+        if user:
+            # Generate a timed token (expires in 1 hour)
+            s = get_password_reset_serializer()
+            token = s.dumps(user.email, salt='password-reset-salt')
+            
+            # Create the reset link
+            reset_url = url_for('reset_password', token=token, _external=True)
+            
+            # Send the email
+            send_email(
+                user.email, 
+                "Password Reset Request for AgriConnect",
+                'emails/reset_password_email.html',
+                user=user, 
+                reset_url=reset_url
+            )
+
+        # IMPORTANT: Show this message whether the user exists or not
+        # This prevents attackers from guessing which emails are registered.
+        flash("If an account with that email exists, a password reset link has been sent.", "info")
+        return redirect(url_for('index'))
+
+    return render_template('forgot_password.html')
+
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    """Verifies the token and renders the 'reset password' form."""
+    s = get_password_reset_serializer()
+    
+    try:
+        # Check the token's validity (max_age=3600 seconds = 1 hour)
+        email = s.loads(token, salt='password-reset-salt', max_age=3600)
+    except:
+        flash("The password reset link is invalid or has expired.", "danger")
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        new_password = request.form.get('password')
+        
+        # Server-side password validation
+        if not new_password or len(new_password) < 8:
+            flash("Password must be at least 8 characters long.", "danger")
+            return render_template('reset_password.html', token=token)
+
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.set_password(new_password)
+            db.session.commit()
+            flash("Your password has been updated successfully! You can now log in.", "success")
+            return redirect(url_for('index'))
+        else:
+            flash("User not found.", "danger")
+            return redirect(url_for('index'))
+
+    # If GET request, just show the form
+    return render_template('reset_password.html', token=token)  
 
 # --- Registration ---
 @app.route('/register_farmer', methods=['POST'])
@@ -1320,40 +1425,6 @@ def how_it_works_user():
 def how_it_works_farmer():
     """How It Works page for Farmers"""
     return render_template('tutorials_farmer.html')
-
-# -----------------------------------------
-# #   if request.method == 'POST':
-#         reason = request.form.get('reason')
-#         if not reason:
-#             flash("You must provide a reason for the return.", "danger")
-#             return redirect(url_for('request_return', order_id=order.id))
-        
-#         # Update the order with the return request
-#         order.return_requested = True
-#         order.return_reason = reason
-#         order.status = "Return Requested"
-#         db.session.commit()
-
-#         # Notify the admin
-#         admin_email = os.getenv('ADMIN_EMAIL')
-#         send_email(
-#             admin_email,
-#             f"New Return Request for Order #{order.id}",
-#             'emails/return_request_admin.html',
-#             user=g.user,
-#             order=order
-#         )
-
-#         flash("Your return request has been submitted for review.", "success")
-#         return redirect(url_for('user_dashboard'))
-
-#     return render_template('request_return.html', order=order)
-
-mail = Mail(app)
-
-# ====================================================================
-# THIS IS THE CORRECTED STARTUP BLOCK
-# ====================================================================
 with app.app_context():
     # Use db.create_all() to ensure all tables exist
     # This is simpler and more reliable for local development

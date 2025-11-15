@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriTrust | Welcome</title>
+    <title>AgriConnect | Welcome</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- 🌐 Google Translate Script -->
     <script type="text/javascript">
         function googleTranslateElementInit() {
             new google.translate.TranslateElement(
                 {
                     pageLanguage: 'en',
-                    includedLanguages: 'hi,te,ta,kn,ml,mr,bn,gu', // Indian languages
-                    layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
+                    layout: google.translate.TranslateElement.InlineLayout.SIMPLE
                 },
                 'google_translate_element'
             );
@@ -27,7 +25,6 @@
 
 <body class="login-page">
 
-    <!-- 🔔 Flash Messages -->
     <div class="flash-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -38,12 +35,10 @@
         {% endwith %}
     </div>
 
-    <!-- 🌐 Language Selector -->
-    <div id="google_translate_element" style="text-align: right; margin: 10px 20px;"></div>
+    <div id="google_translate_element" class="google-translate-widget" style="position: absolute; top: 20px; right: 20px;"></div>
 
     <div class="form-container">
 
-        <!-- 🟢 Login View -->
         <div id="login-view" class="view active">
             <form class="form-box" method="POST" action="{{ url_for('login') }}">
                 <h2 class="form-title">Welcome Back</h2>
@@ -58,13 +53,18 @@
                 </div>
 
                 <button type="submit" class="submit-btn">Login</button>
-                <p class="form-switch">
-                    New here? <a href="#" id="show-register-chooser">Create an Account</a>
-                </p>
+                
+                <div class="form-links">
+                    <p class="form-switch">
+                        New here? <a href="#" id="show-register-chooser">Create an Account</a>
+                    </p>
+                    <p class="form-switch">
+                        <a href="{{ url_for('forgot_password') }}">Forgot Password?</a>
+                    </p>
+                </div>
             </form>
         </div>
 
-        <!-- 🟣 Choose Registration Role -->
         <div id="register-chooser-view" class="view">
             <div class="form-box">
                 <h2 class="form-title">Join Us</h2>
@@ -77,9 +77,8 @@
             </div>
         </div>
 
-        <!-- 🧑 User Register -->
         <div id="user-register-view" class="view">
-            <form class="form-box" method="POST" action="{{ url_for('register_user') }}" enctype="multipart/form-data">
+            <form class="form-box" method="POST" action="{{ url_for('register_user') }}">
                 <h2 class="form-title">Create User Account</h2>
 
                 <div class="form-group"><input type="text" name="name" placeholder="Full Name" required></div>
@@ -89,7 +88,7 @@
                 <div class="form-group"><input type="text" name="place" placeholder="Place / Full Address" required></div>
                 
                 <div class="form-group password-wrapper">
-                    <input type="password" id="user-pass" name="password" placeholder="Create Password Ex:Password@123" required>
+                    <input type="password" id="user-pass" name="password" placeholder="Create Password (min. 8 chars)" required>
                     <span class="toggle-password">Show</span>
                 </div>
 
@@ -100,7 +99,6 @@
             </form>
         </div>
 
-        <!-- 🌾 Farmer Register -->
         <div id="farmer-register-view" class="view">
             <form class="form-box" method="POST" action="{{ url_for('register_farmer') }}" enctype="multipart/form-data">
                 <h2 class="form-title">Create Farmer Account</h2>
@@ -112,7 +110,7 @@
                 <div class="form-group"><input type="text" name="place" placeholder="Place / Farm Address" required></div>
                 
                 <div class="form-group password-wrapper">
-                    <input type="password" id="farmer-pass" name="password" placeholder="Create Password Ex:Password@123" required>
+                    <input type="password" id="farmer-pass" name="password" placeholder="Create Password (min. 8 chars)" required>
                     <span class="toggle-password">Show</span>
                 </div>
 

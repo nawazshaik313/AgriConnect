@@ -1144,3 +1144,66 @@ body {
 body {
     top: 0px !important; 
 }
+/* In static/style.css */
+
+.form-links {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+}
+.form-links .form-switch {
+    margin-top: 0;
+}/* Add this to the bottom of static/style.css */
+
+/* Styles for the "Forgot Password?" link */
+.form-links {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+}
+.form-links .form-switch {
+    margin-top: 0;
+}
+
+/* =================================== */
+/* 12. Google Translate Widget Styles  */
+/* =================================== */
+#google_translate_element {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.75rem;
+}
+#google_translate_element .goog-te-combo {
+    background-color: #f8f9fa;
+    color: #495057;
+    border: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s;
+}
+#google_translate_element .goog-te-combo:hover {
+    background-color: #e9ecef;
+}
+.goog-te-gadget-simple .goog-te-menu-value span {
+    display: none;
+}
+.goog-te-gadget-simple .goog-te-menu-value::before {
+    content: 'Language';
+    padding-right: 0.5em;
+    color: #495057;
+}
+.goog-te-gadget-icon {
+    display: none !important;
+}
+.goog-te-banner-frame.skiptranslate {
+    display: none !important;
+} 
+/* Fix page jump issue */
+body { 
+    top: 0px !important; 
+}
