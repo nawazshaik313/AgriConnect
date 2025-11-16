@@ -67,24 +67,28 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-# --- Product Model ---
+# In models.py
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    price = db.Column(db.Float, nullable=False) # Changed to nullable=False
-    quantity = db.Column(db.Integer, nullable=False) # Changed to nullable=False
+    price = db.Column(db.Float, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
     category = db.Column(db.String(50), nullable=False)
     image_path = db.Column(db.String(200), nullable=False)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     is_featured = db.Column(db.Boolean, default=False)
+    
+    # These are the new columns with their default values
+    unit = db.Column(db.String(20), nullable=False, default='kg')
+    sales_type = db.Column(db.String(20), nullable=False, default='retail')
+    min_order_quantity = db.Column(db.Integer, nullable=False, default=1)
+    
     farmer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     # --- Relationships ---
     farmer = db.relationship('User', backref='products')
     order_items = db.relationship('OrderItem', backref='product')
-    
-# --- Complaint Model ---
 class Complaint(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     complaint_text = db.Column(db.Text, nullable=False)

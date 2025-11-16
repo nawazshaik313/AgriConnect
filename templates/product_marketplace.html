@@ -53,6 +53,11 @@
                     <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Sort by Price: Low to High</option>
                     <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Sort by Price: High to Low</option>
                 </select>
+                <select name="sales_type" class="form-input">
+                    <option value="">All Sale Types</option>
+                    <option value="retail" {% if sales_type_filter == 'retail' %}selected{% endif %}>Retail (Small Amts)</option>
+                    <option value="bulk" {% if sales_type_filter == 'bulk' %}selected{% endif %}>Bulk (Large Amts)</option>
+                </select>
                 
                 <button type="submit" class="btn btn-primary">Apply Filters</button>
             </form>
@@ -76,7 +81,7 @@
                     <p class="product-category">{{ product.category }}</p>
                     
                     <p class="product-description">{{ product.description }}</p>
-                    
+                    <p class="product-min-order">Min. Order: <strong>{{ product.min_order_quantity }} {{ product.unit }}</strong></p>
                     <div class="product-card-footer">
                         <span class="product-price">₹{{ product.price|format_currency }}</span>
                         

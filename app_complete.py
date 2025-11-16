@@ -4,6 +4,7 @@ import qrcode
 import google.generativeai as genai
 import json
 import razorpay 
+from flask import render_template
 from email.message import EmailMessage
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -59,46 +60,62 @@ migrate = Migrate(app, db) # Corrected: 'db' was missing
 # --- Mail Configuration ---
 
 def send_email(to, subject, template, **kwargs):
-    """Uses the Gmail API to send an email."""
-    
-    # Load credentials from the environment variable
-    token_json_str = os.getenv('GMAIL_TOKEN_JSON')
-    if not token_json_str:
-        print("Error: GMAIL_TOKEN_JSON environment variable not set.")
-        return
+    """Send email using Gmail API on Render."""
+
+    # 1. Load token.json from Render environment
+    token_str = os.getenv("GMAIL_TOKEN_JSON")
+    if not token_str:
+        print("❌ ERROR: GMAIL_TOKEN_JSON not set in Render environment")
+        return False
     
     try:
-        # Create credentials from the token.json string
-        creds_info = json.loads(token_json_str)
-        creds = Credentials.from_authorized_user_info(creds_info, ["https://www.googleapis.com/auth/gmail.send"])
-        
-        # If token is expired, refresh it
-        if not creds.valid and creds.refresh_token:
-            creds.refresh(Request())
-            # IMPORTANT: You would need to re-save the new token data
-            # For simplicity, we'll skip this in a server environment
-            # but it's a good practice to handle token rotation.
+        # 2. Load credentials
+        token = json.loads(token_str)
+        creds = Credentials.from_authorized_user_info(
+            token,
+            ["https://www.googleapis.com/auth/gmail.send"]
+        )
 
+        # 3. Refresh token if expired
+        if not creds.valid:
+            if creds.refresh_token:
+                creds.refresh(Request())
+                # Optional: print("🔄 Token refreshed")
+            else:
+                print("❌ Gmail token expired & no refresh token available")
+                return False
+
+        # 4. Create Gmail API service
         service = build("gmail", "v1", credentials=creds)
-        html_content = render_template(template, **kwargs)
-        
+
+        # 5. Render your HTML template
+        html_body = render_template(template, **kwargs)
+
+        # Create the MIME email
         message = EmailMessage()
-        message.set_content("This is a fallback for email clients that do not support HTML.")
-        message.add_alternative(html_content, subtype="html")
         message["To"] = to
-        message["From"] = os.getenv('MAIL_DEFAULT_SENDER') # You can keep this env var
+        message["From"] = os.getenv("MAIL_DEFAULT_SENDER")
         message["Subject"] = subject
-        
-        # Encode the message in base64
-        encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
-        
-        create_message = {"raw": encoded_message}
-        
-        # Send the email
-        service.users().messages().send(userId="me", body=create_message).execute()
-        print(f"Email sent successfully to {to}")
+        message.set_content("Your email client does not support HTML.")
+        message.add_alternative(html_body, subtype="html")
+
+        # Encode email
+        raw_email = base64.urlsafe_b64encode(message.as_bytes()).decode()
+        body = {"raw": raw_email}
+
+        # 6. Send email
+        service.users().messages().send(
+            userId="me",
+            body=body
+        ).execute()
+
+        print(f"✅ Email sent successfully to {to}")
+        return True
+
     except Exception as e:
-        print(f"Error sending email: {e}")
+        print(f"❌ Email send failed: {e}")
+        return False
+
 def allowed_file(filename):
     """Checks if the file's extension is allowed."""
     allowed_extensions = {'png', 'jpg', 'jpeg', 'pdf'}
@@ -522,35 +539,43 @@ def add_product_page():
         flash('You must be logged in as a farmer to add products.', 'danger')
         return redirect(url_for('index'))
     
-    # --- NEW: Fetch and validate the farmer at the beginning ---
+    # Fetch and validate the farmer at the beginning
     farmer = User.query.filter_by(email=session['user_email']).first()
-    # If farmer from session doesn't exist in DB (e.g., after a reset), log them out.
     if not farmer:
         flash("Your session is invalid, please log in again.", "warning")
         return redirect(url_for('logout'))
-    # --------------------------------------------------------
     
     if request.method == 'POST':
-        # The 'farmer' object is already fetched and validated, so we can use it directly.
+        # Get all data from the form
         name = request.form.get('name')
         description = request.form.get('description')
         price = request.form.get('price')
         quantity = request.form.get('quantity')
         category = request.form.get('category')
         image_file = request.files.get('image')
+        
+        # --- NEW FIELDS ---
+        unit = request.form.get('unit')
+        sales_type = request.form.get('sales_type')
+        min_order_quantity = request.form.get('min_order_quantity')
+        # ------------------
 
-        if not all([name, description, price, quantity, category, image_file]):
-            flash("All fields, including an image, are required.", "danger")
+        # --- UPDATED VALIDATION ---
+        if not all([name, description, price, quantity, category, image_file, unit, sales_type, min_order_quantity]):
+            flash("All fields are required, including unit, sales type, and minimum order.", "danger")
             return redirect(url_for('add_product_page'))
+        # --------------------------
         
         if not allowed_file(image_file.filename):
             flash("Invalid image file type. Please use PNG, JPG, or JPEG.", "danger")
             return redirect(url_for('add_product_page'))
 
+        # Save the image file
         filename = secure_filename(f"product_{farmer.id}_{image_file.filename}")
         image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         image_file.save(image_path)
 
+        # --- UPDATED PRODUCT CREATION ---
         new_product = Product(
             name=name,
             description=description,
@@ -558,14 +583,20 @@ def add_product_page():
             quantity=int(quantity),
             category=category,
             image_path=image_path,
-            farmer_id=farmer.id
+            farmer_id=farmer.id,
+            unit=unit,  # Added
+            sales_type=sales_type,  # Added
+            min_order_quantity=int(min_order_quantity)  # Added
         )
+        # --------------------------------
+        
         db.session.add(new_product)
         db.session.commit()
 
         flash("Product added successfully!", "success")
         return redirect(url_for('farmer_dashboard'))
 
+    # This is for the GET request
     return render_template('add_product.html')
 @app.route('/farmer-dashboard/edit-product/<int:product_id>', methods=['GET', 'POST'])
 def edit_product(product_id):
@@ -974,6 +1005,8 @@ def get_ai_price_recommendation(category, base_price, city, state):
         }
     # In app_complete.py, add this new route
 
+# In app_complete.py
+
 @app.route('/ai-add-product', methods=['POST'])
 def ai_add_product():
     """Handles the form submitted from the AI tools page."""
@@ -993,11 +1026,18 @@ def ai_add_product():
     quantity = request.form.get('quantity')
     category = request.form.get('category')
     image_file = request.files.get('image')
+    
+    # --- ADDED NEW FIELDS ---
+    unit = request.form.get('unit')
+    sales_type = request.form.get('sales_type')
+    min_order_quantity = request.form.get('min_order_quantity')
+    # ------------------------
 
-    # Validation
-    if not all([name, description, price, quantity, category, image_file]):
-        flash("All fields, including an image, are required.", "danger")
+    # --- UPDATED VALIDATION ---
+    if not all([name, description, price, quantity, category, image_file, unit, sales_type, min_order_quantity]):
+        flash("All fields, including unit, sales type, and minimum order, are required.", "danger")
         return redirect(url_for('ai_tools'))
+    # --------------------------
     
     if not allowed_file(image_file.filename):
         flash("Invalid image file type. Please use PNG, JPG, or JPEG.", "danger")
@@ -1008,7 +1048,7 @@ def ai_add_product():
     image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     image_file.save(image_path)
 
-    # Create the new product in the database
+    # --- UPDATED PRODUCT CREATION ---
     new_product = Product(
         name=name,
         description=description,
@@ -1016,8 +1056,13 @@ def ai_add_product():
         quantity=int(quantity),
         category=category,
         image_path=image_path,
-        farmer_id=farmer.id
+        farmer_id=farmer.id,
+        unit=unit,  # Added
+        sales_type=sales_type,  # Added
+        min_order_quantity=int(min_order_quantity)  # Added
     )
+    # --------------------------------
+    
     db.session.add(new_product)
     db.session.commit()
 
@@ -1220,7 +1265,7 @@ def product_marketplace():
     category_filter = request.args.get('category')
     location_filter = request.args.get('location')
     sort_by = request.args.get('sort_by', 'freshness') # Default to 'freshness'
-    
+    sales_type_filter = request.args.get('sales_type')
     # Base query for all approved products
     query = Product.query.join(User, User.id == Product.farmer_id).filter(User.status == 'approved')
 
@@ -1233,7 +1278,8 @@ def product_marketplace():
     if location_filter:
         # Check that the filter is not an empty string
         query = query.filter(User.city == location_filter)
-    
+    if sales_type_filter:
+        query = query.filter(Product.sales_type == sales_type_filter)
     # Apply sorting to the query
     if sort_by == 'price_asc':
         query = query.order_by(Product.price.asc())
@@ -1276,7 +1322,8 @@ def product_marketplace():
                            search_query=search_query,
                            category_filter=category_filter,
                            location_filter=location_filter,
-                           sort_by=sort_by)
+                           sort_by=sort_by
+                           ,sales_type_filter=sales_type_filter)
 @app.route('/farmer-profile/<int:farmer_id>')
 def view_farmer_profile(farmer_id):
     # Fetch the farmer, or show a 404 error if not found

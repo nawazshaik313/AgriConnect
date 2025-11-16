@@ -1207,3 +1207,61 @@ body {
 body { 
     top: 0px !important; 
 }
+.product-min-order {
+    font-size: 0.9rem;
+    color: #495057;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+.product-min-order strong {
+    color: var(--danger-color, #e76f51);
+}
+/* --- Password Toggle --- */
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input[type="password"],
+.password-wrapper input[type="text"] {
+    /* Add padding to the right to make space for the button */
+    padding-right: 60px !important; 
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    /* This 'top' value works for inputs with a label above them */
+    top: 65%; 
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Fix for login page (no label) */
+.form-box .password-wrapper .toggle-password {
+    /* This 'top' value works for inputs with NO label */
+    top: 50%;
+}
+/* --- Password Toggle --- */
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input[type="password"],
+.password-wrapper input[type="text"] {
+    /* Add padding to the right to make space for the button */
+    padding-right: 60px !important; 
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%; /* This vertically centers it in the input field */
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    font-weight: 500;
+}

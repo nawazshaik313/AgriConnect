@@ -14,55 +14,93 @@
             Get data-driven insights tailored to your location ({{ farmer_city or 'N/A' }}, {{ farmer_state or 'N/A' }}).
         </p>
 
+        <!-- ========================= -->
+        <!-- PRICE RECOMMENDATION CARD -->
+        <!-- ========================= -->
+
         <div class="ai-tool-card">
-    <h4>Price Recommendation Engine</h4>
-    <p class="form-description">Get a smart price suggestion and let AI create your product listing.</p>
-    
-    <form action="{{ url_for('ai_tools') }}" method="post" class="ai-form">
-        <div class="form-group">
-            <label for="price-category">Product Category</label>
-            <input type="text" id="price-category" name="category" class="form-input" placeholder="e.g., Onions, Wheat" required>
-        </div>
-        <div class="form-group">
-            <label for="base-price">Your Base Price (₹)</label>
-            <input type="number" id="base-price" name="base_price" step="0.01" class="form-input" placeholder="e.g., 40" required>
-        </div>
-        <input type="hidden" name="farmer_city" value="{{ farmer_city }}">
-        <input type="hidden" name="farmer_state" value="{{ farmer_state }}">
-        
-        <button type="submit" name="submit_price" class="btn btn-primary">Get Recommendation</button>
-    </form>
-    
-    {% if price_rec and price_rec.error is not defined %}
-    <div class="ai-result price-result">
-        <p><strong>Live Market Price ({{ farmer_city }}):</strong> <span>{{ price_rec.live_market_price }}</span></p>
-        <p><strong>Recommended Price:</strong> <strong class="highlight">₹{{ price_rec.recommended_price|format_currency }}</strong></p>
-        <p class="reasoning"><em>{{ price_rec.reasoning }}</em></p>
-        
-        <hr style="margin: 1.5rem 0;">
+            <h4>Price Recommendation Engine</h4>
+            <p class="form-description">Get a smart price suggestion and let AI create your product listing.</p>
 
-        <form action="{{ url_for('ai_add_product') }}" method="post" enctype="multipart/form-data">
-            <h4>Accept and Add to Marketplace</h4>
-            <p class="form-description">AI has generated the details. Just add your quantity and a photo to list this product.</p>
-            
-            <input type="hidden" name="name" value="{{ price_rec.product_name }}">
-            <input type="hidden" name="description" value="{{ price_rec.product_description }}">
-            <input type="hidden" name="price" value="{{ price_rec.recommended_price }}">
-            <input type="hidden" name="category" value="{{ category }}"> <div class="form-group">
-                <label for="quantity">Available Quantity (in units, e.g., kg)</label>
-                <input type="number" id="quantity" name="quantity" class="form-input" placeholder="e.g., 100" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="image">Product Image</label>
-                <input type="file" id="image" name="image" class="form-input" required>
-            </div>
+            <form action="{{ url_for('ai_tools') }}" method="post" class="ai-form">
+                <div class="form-group">
+                    <label for="price-category">Product Category</label>
+                    <input type="text" id="price-category" name="category" class="form-input" placeholder="e.g., Onions, Wheat" required>
+                </div>
 
-            <button type="submit" class="btn btn-success" style="width: 100%;">Accept & Add to Marketplace</button>
-        </form>
-    </div>
-    {% endif %}
-    </div>
+                <div class="form-group">
+                    <label for="base-price">Your Base Price (₹)</label>
+                    <input type="number" id="base-price" name="base_price" step="0.01" class="form-input" placeholder="e.g., 40" required>
+                </div>
+
+                <input type="hidden" name="farmer_city" value="{{ farmer_city }}">
+                <input type="hidden" name="farmer_state" value="{{ farmer_state }}">
+
+                <button type="submit" name="submit_price" class="btn btn-primary">Get Recommendation</button>
+            </form>
+
+            {% if price_rec and price_rec.error is not defined %}
+            <div class="ai-result price-result">
+                <p><strong>Live Market Price ({{ farmer_city }}):</strong> <span>{{ price_rec.live_market_price }}</span></p>
+                <p><strong>Recommended Price:</strong>  
+                   <strong class="highlight">₹{{ price_rec.recommended_price|format_currency }}</strong></p>
+                <p class="reasoning"><em>{{ price_rec.reasoning }}</em></p>
+
+                <hr style="margin: 1.5rem 0;">
+
+                <!-- ====================== -->
+                <!-- ADD PRODUCT FORM      -->
+                <!-- ====================== -->
+
+                <form action="{{ url_for('ai_add_product') }}" method="post" enctype="multipart/form-data">
+                    <h4>Accept and Add to Marketplace</h4>
+                    <p class="form-description">AI has generated the details. Add your stock and photo to list the product.</p>
+
+                    <input type="hidden" name="name" value="{{ price_rec.product_name }}">
+                    <input type="hidden" name="description" value="{{ price_rec.product_description }}">
+                    <input type="hidden" name="price" value="{{ price_rec.recommended_price }}">
+                    <input type="hidden" name="category" value="{{ category }}">
+
+                    <!-- 🔥 HIDDEN SALES TYPE (DEFAULT: RETAIL) -->
+                    <input type="hidden" name="sales_type" value="retail">
+
+                    <!-- UNIT + MIN ORDER -->
+                    <div style="display: flex; gap: 1rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="unit">Unit</label>
+                            <input type="text" id="unit" name="unit" class="form-input" placeholder="e.g., kg, quintal" required>
+                        </div>
+
+                        <div class="form-group" style="flex: 1;">
+                            <label for="min_order_quantity">Minimum Order</label>
+                            <input type="number" id="min_order_quantity" name="min_order_quantity" class="form-input" placeholder="e.g., 1" value="1" required>
+                        </div>
+                    </div>
+
+                    <!-- STOCK + IMAGE -->
+                    <div style="display: flex; gap: 1rem;">
+                        <div class="form-group" style="flex: 1%;">
+                            <label for="quantity">Total Stock</label>
+                            <input type="number" id="quantity" name="quantity" class="form-input" placeholder="e.g., 100" required>
+                        </div>
+
+                        <div class="form-group" style="flex: 1%;">
+                            <label for="image">Product Image</label>
+                            <input type="file" id="image" name="image" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success" style="width: 100%;">
+                        Accept & Add to Marketplace
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- =================== -->
+        <!-- DEMAND FORECAST CARD -->
+        <!-- =================== -->
 
         <div class="ai-tool-card">
             <h4>Demand Forecast</h4>
@@ -73,6 +111,7 @@
                     <label for="forecast-category">Product Category</label>
                     <input type="text" id="forecast-category" name="forecast_category" class="form-input" placeholder="e.g., Mangoes, Rice" required>
                 </div>
+
                 <input type="hidden" name="farmer_city" value="{{ farmer_city }}">
                 <input type="hidden" name="farmer_state" value="{{ farmer_state }}">
 
@@ -87,6 +126,7 @@
             </div>
             {% endif %}
         </div>
+
     </div>
 </div>
 {% endblock %}

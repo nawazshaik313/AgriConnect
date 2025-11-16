@@ -13,20 +13,17 @@
     <script type="text/javascript">
     function googleTranslateElementInit() {
         new google.translate.TranslateElement(
-            {
-                pageLanguage: 'en', // Your site's default language
-                // This makes the dropdown simple
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE 
-            }, 
-            'google_translate_element' // The ID of the div to use
+            {pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 
+            'google_translate_element'
         );
     }
     </script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    </head>
+</head>
 <body>
 
     <div id="google_translate_element" class="google-translate-widget"></div>
+
     <div class="flash-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -59,12 +56,13 @@
     
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // This is part of your static/script.js, but good to have here
-        // If your script.js is loaded, this will just re-apply
         const allToggles = document.querySelectorAll('.toggle-password');
+        
         allToggles.forEach(toggle => {
             toggle.addEventListener('click', function () {
-                const passwordInput = this.previousElementSibling;
+                // Find the password input field (which is the element right before the span)
+                const passwordInput = this.previousElementSibling; 
+                
                 if (passwordInput) {
                     const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                     passwordInput.setAttribute('type', type);
@@ -74,7 +72,6 @@
         });
     });
     </script>
-
     {% block scripts %}{% endblock %}
 
 </body>
